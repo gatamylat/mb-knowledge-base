@@ -1671,6 +1671,13 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     animation: fadeIn .2s var(--ease-soft);
 }
 .player.visible { display: flex; }
+.player-frame {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 
 /* Прогресс-бар (полоски сверху) */
 .player-progress {
@@ -1730,6 +1737,39 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     -webkit-overflow-scrolling: touch;
 }
 .player-slide::-webkit-scrollbar { display: none; }
+
+/* Десктоп: сторис в телефонной пропорции по центру, фон затемнён */
+@media (min-width: 700px) {
+    .player {
+        align-items: center;
+        justify-content: center;
+        background: rgba(20,18,10,.55);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    html.dark .player { background: rgba(0,0,0,.7); }
+    /* Внутренняя «рамка телефона» */
+    .player-frame {
+        position: relative;
+        width: min(420px, 92vw);
+        height: min(86vh, calc((420px) * 16 / 9));
+        max-height: 860px;
+        background: var(--bg);
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: var(--sh-3);
+        display: flex;
+        flex-direction: column;
+    }
+    /* Крестик выносим наружу рамки, вверх-вправо */
+    .player-close {
+        top: -2px;
+        right: -52px;
+        background: rgba(255,255,255,.14);
+        color: #fff;
+    }
+    html.dark .player-close { background: rgba(255,255,255,.14); }
+}
 
 /* Зоны тапа влево/вправо */
 .player-navzone {
@@ -1814,6 +1854,112 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     font-size: 15px; color: var(--t2);
     margin-top: 12px; line-height: 1.5;
 }
+
+/* ======================================================== */
+/* === ИИ-ПОИСК (спросить базу) =========================== */
+/* ======================================================== */
+/* Кнопка-искра в строке поиска */
+.search-ai-btn {
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: var(--acc-bg);
+    color: var(--acc);
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .15s var(--ease-soft), transform .1s var(--ease-soft);
+    z-index: 2;
+}
+.search-ai-btn:hover { background: rgba(26,122,230,.14); }
+.search-ai-btn:active { transform: translateY(-50%) scale(.9); }
+.search-ai-btn svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+/* сдвигаем поле, чтобы крестик-очистка и искра не накладывались */
+.search-wrap.has-ai .search { padding-right: 78px; }
+.search-wrap.has-ai .search-clear { right: 44px; }
+
+/* Панель ответа ИИ (модалка) */
+.ai-panel .modal { max-width: 640px; }
+.ai-ask-row {
+    display: flex; gap: 8px; margin-bottom: 6px;
+}
+.ai-ask-input {
+    flex: 1;
+    font-family: var(--sans); font-size: 15px;
+    padding: 12px 14px;
+    border: 1px solid var(--brd);
+    border-radius: var(--r-input);
+    background: var(--bg); color: var(--t1);
+    outline: none;
+    transition: border-color .15s var(--ease-soft), box-shadow .15s var(--ease-soft);
+}
+.ai-ask-input:focus { border-color: var(--acc); box-shadow: 0 0 0 3px var(--acc-bg); }
+.ai-ask-send {
+    flex-shrink: 0;
+    font-family: var(--sans); font-size: 15px; font-weight: 600;
+    padding: 0 18px;
+    border-radius: var(--r-input);
+    border: none; background: var(--acc); color: #fff;
+    cursor: pointer;
+    transition: filter .15s var(--ease-soft), transform .1s var(--ease-soft);
+}
+.ai-ask-send:hover { filter: brightness(1.08); }
+.ai-ask-send:active { transform: scale(.97); }
+.ai-ask-send:disabled { background: var(--surf-2); color: var(--t3); cursor: default; }
+.ai-hint {
+    font-family: var(--sans); font-size: 12px; color: var(--t2);
+    margin-bottom: 14px; line-height: 1.4;
+}
+.ai-answer {
+    margin-top: 16px;
+    font-family: var(--sans); font-size: 16px; line-height: 1.6;
+    color: var(--t1); letter-spacing: -.1px;
+    white-space: pre-wrap;
+}
+.ai-answer:empty { display: none; }
+.ai-thinking {
+    font-family: var(--sans); font-size: 14px; color: var(--t2);
+    margin-top: 16px; display: flex; align-items: center; gap: 8px;
+}
+.ai-thinking .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--acc);
+    animation: aiPulse 1.2s var(--ease-soft) infinite;
+}
+@keyframes aiPulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+/* Источники-нормы под ответом */
+.ai-sources {
+    margin-top: 18px; padding-top: 14px;
+    border-top: 1px solid var(--brd);
+}
+.ai-sources-label {
+    font-family: var(--sans); font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .5px;
+    color: var(--t2); margin-bottom: 10px;
+}
+.ai-source {
+    padding: 10px 12px; margin-bottom: 6px;
+    background: var(--surf-2); border-radius: var(--r-input);
+    cursor: pointer; transition: background .15s var(--ease-soft);
+}
+.ai-source:hover { background: var(--acc-bg); }
+.ai-source-title {
+    font-family: var(--serif); font-size: 15px; font-weight: 500;
+    color: var(--t1); letter-spacing: -.2px;
+}
+.ai-source-meta {
+    font-family: var(--sans); font-size: 11px; color: var(--t2);
+    margin-top: 2px;
+}
+/* Подсказка про ключ */
+.ai-needkey {
+    margin-top: 14px; padding: 14px 16px;
+    background: var(--acc-bg); border-radius: var(--r-input);
+    font-family: var(--sans); font-size: 14px; line-height: 1.5; color: var(--t1);
+}
+.ai-needkey a { color: var(--acc); cursor: pointer; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -1845,6 +1991,9 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
         <button class="search-clear" id="search-clear" aria-label="Очистить">
             <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
+        <button class="search-ai-btn" id="search-ai-btn" title="Спросить базу (ИИ)" aria-label="Спросить базу">
+            <svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.2L19 10l-5.1 1.8L12 17l-1.9-5.2L5 10l5.1-1.8z"/></svg>
+        </button>
     </div>
 </header>
 
@@ -1869,14 +2018,16 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 
 <!-- Полноэкранный проигрыватель сторис -->
 <div class="player" id="player">
-    <div class="player-progress" id="player-progress"></div>
-    <div class="player-counter" id="player-counter"></div>
-    <button class="player-close" id="player-close" aria-label="Закрыть">
-        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
-    </button>
-    <div class="player-navzone left" id="player-nav-left"></div>
-    <div class="player-navzone right" id="player-nav-right"></div>
-    <div class="player-track" id="player-track"></div>
+    <div class="player-frame" id="player-frame">
+        <div class="player-progress" id="player-progress"></div>
+        <div class="player-counter" id="player-counter"></div>
+        <button class="player-close" id="player-close" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="player-navzone left" id="player-nav-left"></div>
+        <div class="player-navzone right" id="player-nav-right"></div>
+        <div class="player-track" id="player-track"></div>
+    </div>
 </div>
 
 <!-- FAB: добавить запись -->
@@ -2007,6 +2158,10 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
                 <span>Поиск конфликтов в базе</span>
             </button>
+            <button class="menu-item" id="m-ai-settings">
+                <svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.2L19 10l-5.1 1.8L12 17l-1.9-5.2L5 10l5.1-1.8z"/></svg>
+                <span>Настройки ИИ (API ключ)</span>
+            </button>
             <div class="menu-divider"></div>
             <button class="menu-item" id="m-export-json">
                 <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -2043,6 +2198,41 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     </button>
     <img id="lightbox-img" src="" alt="">
     <div class="lightbox-caption" id="lightbox-caption" style="display:none;"></div>
+</div>
+
+<!-- Модалка: ИИ-поиск «Спросить базу» -->
+<div class="modal-backdrop ai-panel" id="modal-ai">
+    <div class="modal form-modal">
+        <button class="modal-close" id="ai-close" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <h2>Спросить базу</h2>
+        <p class="ai-hint">Задай вопрос обычными словами — отвечу по нормам корпуса и покажу, на какие записи опираюсь.</p>
+        <div class="ai-ask-row">
+            <input type="text" class="ai-ask-input" id="ai-ask-input" placeholder="Напр.: чем крепить тяжёлое зеркало?">
+            <button class="ai-ask-send" id="ai-ask-send">Спросить</button>
+        </div>
+        <div id="ai-result"></div>
+    </div>
+</div>
+
+<!-- Модалка: настройки ИИ (ключ) -->
+<div class="modal-backdrop" id="modal-ai-settings">
+    <div class="modal form-modal">
+        <button class="modal-close" id="ai-set-close" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <h2>Настройки ИИ</h2>
+        <div class="form-row">
+            <label>Anthropic API Key</label>
+            <input type="password" id="ai-key-input" placeholder="sk-ant-..." autocomplete="off">
+            <div class="set-hint" style="font-family:var(--sans);font-size:12px;color:var(--t2);margin-top:6px;line-height:1.4;">Хранится только в этом браузере (localStorage), в файл не попадает. Ключ берётся на console.anthropic.com → API Keys.</div>
+        </div>
+        <div class="form-actions">
+            <button class="btn" id="ai-key-clear">Удалить ключ</button>
+            <button class="btn btn-primary" id="ai-key-save">Сохранить</button>
+        </div>
+    </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -3735,11 +3925,146 @@ function loadMode() {
 }
 
 // ========================================================
-// СТОРИС — реестр модулей и движок-проигрыватель
-// (по спецификации stories-design.md)
+// ИИ-ПОИСК «Спросить базу» (RAG на Claude API)
+// Механика вызова — как в «Рефлексии»: прямой запрос из браузера,
+// ключ в localStorage, в файл не попадает.
 // ========================================================
 
-// === РЕЕСТР СТОРИС (манифест) ===
+const AI_KEY_STORAGE = "mb_claude_key";
+function getAiKey() { return localStorage.getItem(AI_KEY_STORAGE) || ""; }
+function setAiKey(k) {
+    if (k) localStorage.setItem(AI_KEY_STORAGE, k);
+    else localStorage.removeItem(AI_KEY_STORAGE);
+}
+
+// Ранжируем записи по числу совпавших стем-токенов (OR + скоринг),
+// чтобы найти релевантный контекст даже при неполном совпадении.
+function rankRecordsForQuery(query, limit = 8) {
+    const qTokens = [...new Set(stemmedTokens(query))];
+    if (qTokens.length === 0) return [];
+    const scored = [];
+    state.records.forEach(r => {
+        if (r.status === "superseded") return; // устаревшие в контекст не берём
+        const hay = [r.title || "", r.title || "", r.content || "",
+                     (r.tags || []).join(" "), r.subcategory || "", r.category || ""].join(" ");
+        const recTokens = new Set(stemmedTokens(hay));
+        let score = 0;
+        qTokens.forEach(qt => {
+            for (const rt of recTokens) {
+                if (rt === qt) { score += 2; break; }
+                if (rt.startsWith(qt) || qt.startsWith(rt)) { score += 1; break; }
+            }
+        });
+        if (score > 0) scored.push({ r, score });
+    });
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, limit).map(x => x.r);
+}
+
+// Прямой вызов Claude (как в «Рефлексии»)
+async function callClaudeSystem(sys, userMsg, maxTokens = 700) {
+    const key = getAiKey();
+    if (!key) throw new Error("API ключ не задан");
+    const body = { model: "claude-sonnet-4-6", max_tokens: maxTokens, messages: [{ role: "user", content: userMsg }] };
+    if (sys) body.system = sys;
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-api-key": key,
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify(body)
+    });
+    const raw = await r.text();
+    if (!r.ok) { let m = "HTTP " + r.status; try { m = JSON.parse(raw)?.error?.message || m; } catch (_) {} throw new Error(m); }
+    return JSON.parse(raw).content[0].text;
+}
+
+let aiLastSources = [];
+
+async function askKnowledgeBase(question) {
+    const result = document.getElementById("ai-result");
+    if (!getAiKey()) {
+        result.innerHTML = `<div class="ai-needkey">Нужен API-ключ Anthropic. Открой <a id="ai-goto-settings">Настройки ИИ</a> и вставь ключ — он сохранится только в этом браузере.</div>`;
+        document.getElementById("ai-goto-settings").onclick = () => { closeModal("modal-ai"); openAiSettings(); };
+        return;
+    }
+    if (!question.trim()) return;
+
+    // 1. Находим релевантные нормы
+    const found = rankRecordsForQuery(question, 8);
+    aiLastSources = found;
+
+    if (found.length === 0) {
+        result.innerHTML = `<div class="ai-answer">В корпусе не нашлось записей по этому запросу. Попробуй переформулировать или проверь, есть ли такая тема в базе.</div>`;
+        return;
+    }
+
+    // 2. Готовим контекст для Claude
+    const context = found.map((r, i) =>
+        `[${i + 1}] ${r.title}\nКатегория: ${r.category}${r.subcategory ? " / " + r.subcategory : ""} · тип: ${r.priority || r.type}\n${r.content}`
+    ).join("\n\n");
+
+    const sys = "Ты — помощник по корпоративной базе знаний мебельного производства «Массивбург». " +
+        "Отвечай ТОЛЬКО на основе предоставленных записей-норм, своими словами, кратко и по делу, на русском. " +
+        "Не выдумывай того, чего нет в записях. Если в записях нет ответа — честно скажи об этом. " +
+        "Ссылайся на номера записей в квадратных скобках, например [2], чтобы можно было проверить норму. " +
+        "Пиши практично, как опытный конструктор объясняет коллеге.";
+
+    const userMsg = `Записи-нормы из базы:\n\n${context}\n\n---\nВопрос: ${question}\n\nОтветь по делу, опираясь на записи и ссылаясь на их номера.`;
+
+    // 3. Показываем «думает»
+    result.innerHTML = `<div class="ai-thinking"><span class="dot"></span><span>Claude читает нормы…</span></div>`;
+    document.getElementById("ai-ask-send").disabled = true;
+
+    try {
+        const answer = await callClaudeSystem(sys, userMsg, 700);
+        renderAiAnswer(answer, found);
+    } catch (e) {
+        result.innerHTML = `<div class="ai-needkey">Ошибка: ${escapeHtml(e.message)}. Проверь ключ в Настройках ИИ или соединение.</div>`;
+    } finally {
+        document.getElementById("ai-ask-send").disabled = false;
+    }
+}
+
+function renderAiAnswer(answer, sources) {
+    const result = document.getElementById("ai-result");
+    // Ссылки [N] делаем кликабельными визуально (просто текст), источники — ниже
+    const answerHtml = escapeHtml(answer);
+    let html = `<div class="ai-answer">${answerHtml}</div>`;
+    if (sources.length) {
+        html += `<div class="ai-sources"><div class="ai-sources-label">Источники — нормы из базы</div>`;
+        sources.forEach((r, i) => {
+            html += `<div class="ai-source" data-ai-src="${escapeHtml(r.id)}">
+                <div class="ai-source-title">[${i + 1}] ${escapeHtml(r.title)}</div>
+                <div class="ai-source-meta">${escapeHtml(r.category)}${r.subcategory ? " · " + escapeHtml(r.subcategory) : ""} · ${escapeHtml(r.priority || r.type || "")}</div>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+    result.innerHTML = html;
+    // Клик по источнику открывает полную запись
+    result.querySelectorAll("[data-ai-src]").forEach(el => {
+        el.onclick = () => { closeModal("modal-ai"); openRecord(el.dataset.aiSrc); };
+    });
+}
+
+function openAiPanel(prefill) {
+    document.getElementById("ai-result").innerHTML = "";
+    const input = document.getElementById("ai-ask-input");
+    if (prefill) input.value = prefill;
+    document.getElementById("modal-ai").classList.add("visible");
+    setTimeout(() => input.focus(), 100);
+}
+
+function openAiSettings() {
+    document.getElementById("ai-key-input").value = getAiKey();
+    document.getElementById("modal-ai-settings").classList.add("visible");
+}
+
+
 // Список сторис лежит в файле stories/index.json рядом с index.html.
 // Чтобы добавить сторис: положи stories/<имя>.json и впиши строку в
 // stories/index.json — код менять не нужно, index подхватит сам.
@@ -4089,6 +4414,31 @@ function bindEvents() {
     document.getElementById("m-clear").onclick = clearAll;
     document.getElementById("m-close").onclick = () => closeModal("modal-menu");
     document.getElementById("m-find-conflicts").onclick = openConflictsSearch;
+
+    // === ИИ-ПОИСК ===
+    document.querySelector(".search-wrap").classList.add("has-ai");
+    document.getElementById("search-ai-btn").onclick = () => {
+        const q = document.getElementById("search").value.trim();
+        openAiPanel(q); // переносим текущий запрос в ИИ-панель
+    };
+    document.getElementById("ai-close").onclick = () => closeModal("modal-ai");
+    document.getElementById("ai-ask-send").onclick = () => askKnowledgeBase(document.getElementById("ai-ask-input").value);
+    document.getElementById("ai-ask-input").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); askKnowledgeBase(e.target.value); }
+    });
+    // Настройки ИИ
+    document.getElementById("m-ai-settings").onclick = () => { closeModal("modal-menu"); openAiSettings(); };
+    document.getElementById("ai-set-close").onclick = () => closeModal("modal-ai-settings");
+    document.getElementById("ai-key-save").onclick = () => {
+        setAiKey(document.getElementById("ai-key-input").value.trim());
+        closeModal("modal-ai-settings");
+        toast("Ключ сохранён");
+    };
+    document.getElementById("ai-key-clear").onclick = () => {
+        setAiKey("");
+        document.getElementById("ai-key-input").value = "";
+        toast("Ключ удалён");
+    };
     
     // Модалка конфликта при сохранении
     document.getElementById("c-cancel").onclick = () => {
