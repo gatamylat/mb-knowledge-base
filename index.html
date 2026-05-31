@@ -1,0 +1,4165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FAF9F5">
+<title>МБ База Знаний</title>
+
+<!-- PWA манифест встроенный -->
+<link rel="manifest" href='data:application/json;charset=utf-8,{"name":"МБ База Знаний","short_name":"МБ База","start_url":".","display":"standalone","background_color":"%23FAF9F5","theme_color":"%23FAF9F5","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2724%27 fill=%27%23FAF9F5%27/%3E%3Ctext y=%27.95em%27 x=%2738%27 font-size=%27130%27 font-family=%27serif%27 fill=%27%23463F30%27%3E%26%23128218%3B%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='.9em' font-size='52'%3E📚%3C/text%3E%3C/svg%3E">
+
+<!-- Шрифты: Playfair Display для заголовков (книжный), DM Sans для тела -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ========================================================
+   МБ База Знаний — стили по дизайн-системе Surf
+   ======================================================== */
+
+/* === ШРИФТЫ И СБРОС === */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+*:not(input):not(textarea):not(select) {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* === ТЕМА: СВЕТЛАЯ (по умолчанию) === */
+:root {
+    /* Поверхности */
+    --bg: #FAF9F5;
+    --surf: #FFFFFF;
+    --surf-2: rgba(0, 0, 0, .04);
+    
+    /* Текст */
+    --t1: #1C1C1E;
+    --t2: #8A8985;
+    --t3: #C4C3BE;
+    
+    /* Акценты */
+    --acc: #1A7AE6;
+    --acc-bg: rgba(26, 122, 230, .06);
+    --ok: #2EBD52;
+    --danger: #E8453A;
+    --warn: #E89A0A;
+    
+    /* Линии и тени */
+    --brd: rgba(40, 35, 20, .06);
+    --brd-2: rgba(40, 35, 20, .12);
+    --sh-1: 0 1px 4px rgba(30, 25, 10, .03);
+    --sh-2: 0 4px 12px rgba(30, 25, 10, .06);
+    --sh-3: 0 8px 32px rgba(30, 25, 10, .12);
+    --sh-acc: 0 4px 14px rgba(26, 122, 230, .3);
+    
+    /* Радиусы */
+    --r-sheet: 16px 16px 0 0;
+    --r-card: 12px;
+    --r-input: 8px;
+    --r-tab: 6px;
+    --r-pill: 100px;
+    
+    /* Типографика */
+    --serif: "Playfair Display", Georgia, serif;
+    --sans: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    
+    /* Анимация */
+    --ease-soft: cubic-bezier(.22, 1, .36, 1);
+    --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* === ТЁМНАЯ ТЕМА === */
+html.dark {
+    --bg: #1A1A1D;
+    --surf: #2C2C2E;
+    --surf-2: rgba(255, 255, 255, .05);
+    --t1: #F0EFEA;
+    --t2: #9A9A9A;
+    --t3: #5C5C5E;
+    --acc: #4A9FF5;
+    --acc-bg: rgba(74, 159, 245, .1);
+    --brd: rgba(255, 255, 255, .08);
+    --brd-2: rgba(255, 255, 255, .16);
+    --sh-1: 0 1px 4px rgba(0, 0, 0, .2);
+    --sh-2: 0 4px 12px rgba(0, 0, 0, .3);
+    --sh-3: 0 8px 32px rgba(0, 0, 0, .5);
+}
+
+/* === АКЦЕНТНАЯ ПАЛИТРА (циклически для категорий) === */
+/* 8 цветов: фиолетовый, охра, зелёный, красный, синий, бирюза, золотой, бежевый */
+
+html, body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--t1);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: contain;
+    transition: background .3s var(--ease-soft), color .3s var(--ease-soft);
+}
+
+input, textarea, select {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* === ШАПКА === */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--brd);
+    padding: 14px 20px 12px;
+    transition: background .3s var(--ease-soft);
+}
+
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    max-width: 1280px;
+    margin-inline: auto;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    line-height: 1.1;
+    overflow: hidden;
+}
+
+.brand-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    color: var(--t1);
+}
+
+.brand-sub {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--t2);
+    letter-spacing: 0.2px;
+    margin-top: 2px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* === ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ (сегмент) === */
+.mode-switch {
+    display: inline-flex;
+    background: var(--surf-2);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+}
+.mode-btn {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    color: var(--t2);
+    cursor: pointer;
+    border-radius: var(--r-tab);
+    transition: all .2s var(--ease-soft);
+    letter-spacing: -.1px;
+    line-height: 1.2;
+}
+.mode-btn:hover { color: var(--t1); }
+.mode-btn.active {
+    background: var(--surf);
+    color: var(--t1);
+    box-shadow: 0 1px 3px rgba(30, 25, 10, .06);
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--t1);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s var(--ease-soft), transform .1s var(--ease-soft);
+    padding: 0;
+}
+.btn-icon:hover { background: var(--brd); }
+.btn-icon:active { background: var(--brd-2); transform: scale(.92); }
+.btn-icon svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* === БАЗОВАЯ КНОПКА (для модалок) === */
+.btn {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: var(--r-input);
+    border: 1px solid var(--brd);
+    background: var(--surf);
+    color: var(--t1);
+    cursor: pointer;
+    transition: all .15s var(--ease-soft);
+    white-space: nowrap;
+    line-height: 1.2;
+    letter-spacing: -.1px;
+}
+.btn:hover { background: var(--surf-2); border-color: var(--brd-2); }
+.btn:active { transform: scale(.98); }
+
+.btn-primary {
+    background: var(--acc);
+    color: #fff;
+    border-color: var(--acc);
+}
+.btn-primary:hover {
+    background: var(--acc);
+    filter: brightness(1.08);
+}
+
+.btn-danger {
+    color: var(--danger);
+}
+
+/* === ПОИСК === */
+.search-wrap {
+    position: relative;
+    max-width: 1280px;
+    margin-inline: auto;
+}
+
+.search {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 15px;
+    padding: 12px 14px 12px 42px;
+    border: 1px solid var(--brd);
+    border-radius: var(--r-input);
+    background: var(--surf);
+    color: var(--t1);
+    outline: none;
+    transition: border-color .15s var(--ease-soft), box-shadow .15s var(--ease-soft);
+    letter-spacing: -.1px;
+}
+.search:focus {
+    border-color: var(--acc);
+    box-shadow: 0 0 0 3px var(--acc-bg);
+}
+.search::placeholder { color: var(--t3); }
+
+.search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--t2);
+    pointer-events: none;
+    display: flex;
+}
+.search-icon svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+.search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--t2);
+    padding: 6px;
+    line-height: 1;
+    display: none;
+    border-radius: 50%;
+    transition: background .15s var(--ease-soft);
+}
+.search-clear:hover { background: var(--brd); color: var(--t1); }
+.search-clear.visible { display: flex; }
+.search-clear svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+
+/* === ФИЛЬТРЫ === */
+.filters {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 14px 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+}
+
+.filter-label {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: -0.3px;
+    color: var(--t2);
+    margin-right: 10px;
+}
+
+.chip {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--brd);
+    background: transparent;
+    color: var(--t2);
+    cursor: pointer;
+    transition: all .15s var(--ease-soft);
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: -.1px;
+}
+.chip:hover {
+    border-color: var(--brd-2);
+    color: var(--t1);
+}
+.chip:active { transform: scale(.96); }
+.chip.active {
+    background: var(--t1);
+    color: var(--bg);
+    border-color: var(--t1);
+}
+.chip-count {
+    font-size: 12px;
+    opacity: .55;
+}
+.chip.active .chip-count { opacity: .7; }
+
+/* Точка категории (циклический цвет) */
+.chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--chip-color, var(--t3));
+    flex-shrink: 0;
+}
+
+/* === СТАТИСТИКА === */
+.stats {
+    max-width: 1280px;
+    margin: 10px auto 0;
+    padding: 0 20px;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--t2);
+    letter-spacing: 0.2px;
+}
+.stats strong {
+    color: var(--t1);
+    font-weight: 600;
+}
+
+/* === ЛЕНТА === */
+.feed {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 14px 20px 100px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 12px;
+}
+
+/* === КАРТОЧКА ЗАПИСИ === */
+.card {
+    background: var(--surf);
+    border: 1px solid var(--brd);
+    border-radius: var(--r-card);
+    padding: 14px 16px 13px;
+    box-shadow: var(--sh-1);
+    cursor: pointer;
+    transition: transform .15s var(--ease-soft), box-shadow .2s var(--ease-soft), border-color .15s var(--ease-soft);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.card:hover {
+    box-shadow: var(--sh-2);
+    border-color: var(--brd-2);
+}
+.card:active { transform: scale(.99); }
+
+/* Полоска приоритета — только для антипримера (high) и задачи (medium).
+   Остальные приоритеты — без полоски (low/none по Surf). */
+.card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background .15s var(--ease-soft);
+}
+.card[data-priority="антипример"]::before { background: var(--danger); }
+.card[data-priority="задача"]::before { background: var(--warn); }
+
+.card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-priority {
+    color: var(--t2);
+}
+.card[data-priority="антипример"] .card-priority { color: var(--danger); }
+.card[data-priority="задача"] .card-priority { color: var(--warn); }
+.card[data-priority="решение"] .card-priority { color: var(--ok); }
+.card[data-priority="обсуждается"] .card-priority { color: var(--acc); }
+
+.card-cat {
+    color: var(--t2);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-transform: none;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 60%;
+    font-size: 11px;
+}
+.card-cat-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cat-color, var(--t3));
+    flex-shrink: 0;
+}
+
+.card-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    color: var(--t1);
+    letter-spacing: -0.3px;
+}
+
+.card-content {
+    font-family: var(--sans);
+    color: var(--t2);
+    font-size: 14px;
+    line-height: 1.5;
+    flex: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+.card-footer {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    min-height: 20px;
+}
+
+.tag {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    background: var(--surf-2);
+    color: var(--t2);
+    border-radius: var(--r-pill);
+    letter-spacing: 0;
+}
+
+/* Подсветка совпадений поиска */
+mark {
+    background: var(--acc-bg);
+    color: var(--t1);
+    padding: 0 2px;
+    border-radius: 2px;
+    font-weight: 600;
+}
+
+/* === КНИГА (режим чтения) === */
+.book {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 24px 32px 120px;
+    font-family: var(--sans);
+    color: var(--t1);
+}
+
+.book[hidden] { display: none; }
+
+/* Шапка-обложка */
+.book-cover {
+    text-align: center;
+    padding: 20px 0 28px;
+    border-bottom: 1px solid var(--brd);
+    margin-bottom: 28px;
+}
+.book-cover-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    color: var(--t1);
+    margin-bottom: 10px;
+}
+.book-cover-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--t2);
+    font-weight: 400;
+    letter-spacing: -.1px;
+}
+.book-cover-meta {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--t2);
+    margin-top: 14px;
+    letter-spacing: .2px;
+}
+
+/* Оглавление */
+.book-toc {
+    margin-bottom: 36px;
+    padding: 20px 24px;
+    background: var(--surf);
+    border: 1px solid var(--brd);
+    border-radius: var(--r-card);
+}
+.book-toc-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--t2);
+    margin-bottom: 12px;
+}
+.book-toc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+.book-toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 6px 0;
+    color: var(--t1);
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+    transition: color .15s var(--ease-soft);
+    cursor: pointer;
+}
+.book-toc-item:hover {
+    color: var(--acc);
+}
+.book-toc-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--t3);
+    min-width: 24px;
+    flex-shrink: 0;
+}
+.book-toc-name {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -.2px;
+    flex: 1;
+    border-bottom: 1px dotted var(--brd-2);
+    padding-bottom: 2px;
+    transform: translateY(-2px);
+}
+.book-toc-count {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--t2);
+    flex-shrink: 0;
+}
+
+/* Глава */
+.book-chapter {
+    margin-bottom: 40px;
+    scroll-margin-top: 80px;
+}
+.book-chapter-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--t2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+.book-chapter-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.15;
+    color: var(--t1);
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--brd);
+}
+.book-chapter-intro {
+    font-family: var(--sans);
+    font-style: italic;
+    color: var(--t2);
+    margin-bottom: 18px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Подраздел */
+.book-section {
+    margin-bottom: 20px;
+}
+.book-section-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--t1);
+    letter-spacing: -.3px;
+    margin: 22px 0 12px;
+    padding-left: 12px;
+    border-left: 2px solid var(--brd-2);
+}
+
+/* Запись в книге */
+.book-entry {
+    margin-bottom: 16px;
+    padding-left: 0;
+    cursor: pointer;
+    transition: opacity .15s var(--ease-soft);
+    position: relative;
+}
+.book-entry:hover .book-entry-edit {
+    opacity: 1;
+}
+.book-entry-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+    min-height: 0;
+}
+.book-entry-head:empty { display: none; }
+.book-entry-mark {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 2px 7px;
+    border-radius: var(--r-pill);
+    background: var(--surf-2);
+    color: var(--t2);
+    flex-shrink: 0;
+    line-height: 1.4;
+}
+.book-entry[data-priority="антипример"] .book-entry-mark {
+    background: rgba(232, 69, 58, .1);
+    color: var(--danger);
+}
+.book-entry[data-priority="задача"] .book-entry-mark {
+    background: rgba(232, 154, 10, .12);
+    color: var(--warn);
+}
+.book-entry[data-priority="решение"] .book-entry-mark {
+    background: rgba(46, 189, 82, .12);
+    color: var(--ok);
+}
+.book-entry[data-priority="обсуждается"] .book-entry-mark {
+    background: var(--acc-bg);
+    color: var(--acc);
+}
+.book-entry-edit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--t2);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity .2s var(--ease-soft), background .15s var(--ease-soft);
+    padding: 0;
+    flex-shrink: 0;
+    z-index: 2;
+}
+.book-entry-edit:hover {
+    background: var(--surf-2);
+    color: var(--t1);
+    opacity: 1;
+}
+.book-entry-edit svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+/* На сенсорных устройствах карандаш всегда виден */
+@media (hover: none) {
+    .book-entry-edit { opacity: 0.5; }
+}
+
+.book-entry-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 1.3;
+    letter-spacing: -.2px;
+    color: var(--t1);
+    margin-bottom: 3px;
+    padding-right: 36px;
+}
+.book-entry-body {
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--t1);
+    letter-spacing: -.1px;
+}
+.book-entry-body a {
+    color: var(--acc);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    word-break: break-word;
+}
+.book-entry-tags {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* Кнопка "наверх" */
+.book-top {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    right: 20px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--t1);
+    color: var(--bg);
+    border: none;
+    cursor: pointer;
+    box-shadow: var(--sh-2);
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s var(--ease-spring), opacity .2s var(--ease-soft);
+}
+.book-top.visible { display: inline-flex; }
+.book-top:active { transform: scale(.9); }
+.book-top svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (max-width: 600px) {
+    .book {
+        padding: 16px 16px 100px;
+    }
+    .book-cover { padding: 12px 0 22px; margin-bottom: 22px; }
+    .book-cover-title { font-size: 28px; }
+    .book-cover-sub { font-size: 14px; }
+    .book-toc { padding: 16px 18px; margin-bottom: 28px; }
+    .book-toc-name { font-size: 16px; }
+    .book-chapter { margin-bottom: 32px; }
+    .book-chapter-title { font-size: 24px; margin-bottom: 16px; }
+    .book-section-title { font-size: 18px; margin: 18px 0 10px; }
+    .book-entry { margin-bottom: 14px; }
+    .book-entry-title { font-size: 17px; }
+    .book-entry-body { font-size: 15px; }
+}
+
+
+.fab {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    right: 20px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--acc);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: var(--sh-acc);
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s var(--ease-spring), box-shadow .2s var(--ease-soft);
+}
+.fab:hover { box-shadow: 0 6px 18px rgba(26, 122, 230, .4); }
+.fab:active { transform: scale(.9); }
+.fab svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* === МОДАЛКА (bottom sheet на mobile, центр на desktop) === */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 18, 10, .18);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadeIn .2s var(--ease-soft);
+}
+html.dark .modal-backdrop {
+    background: rgba(0, 0, 0, .5);
+}
+.modal-backdrop.visible {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.modal {
+    background: var(--surf);
+    border-radius: var(--r-sheet);
+    width: 100%;
+    max-width: 640px;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: var(--sh-3);
+    animation: slideUp .3s var(--ease-soft);
+    position: relative;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Ручка-индикатор для bottom sheet */
+.modal::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    display: block;
+    width: 28px;
+    height: 3px;
+    background: var(--t1);
+    opacity: .18;
+    border-radius: 100px;
+    margin: 8px auto 4px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surf-2);
+    border: none;
+    cursor: pointer;
+    color: var(--t2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s var(--ease-soft);
+    z-index: 2;
+    padding: 0;
+}
+.modal-close:hover { background: var(--brd); color: var(--t1); }
+.modal-close svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+
+/* === МОДАЛКА ПРОСМОТРА === */
+.modal-content {
+    padding: 8px 20px 24px;
+}
+
+.modal-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--t2);
+    flex-wrap: wrap;
+}
+
+.modal-priority {
+    color: var(--modal-pr-color, var(--t2));
+}
+
+.modal-meta-sep {
+    color: var(--t3);
+}
+
+.modal-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    color: var(--t1);
+    letter-spacing: -0.3px;
+    padding-right: 36px;
+}
+
+.modal-body {
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--t1);
+    margin-bottom: 20px;
+    letter-spacing: -.1px;
+}
+
+.modal-body a {
+    color: var(--acc);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    word-break: break-word;
+}
+
+.modal-section {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--brd);
+}
+
+.modal-section-label {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--t2);
+    margin-bottom: 8px;
+}
+
+.modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.modal-source {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--t1);
+    line-height: 1.5;
+}
+.modal-source em {
+    color: var(--t2);
+    font-style: normal;
+    font-size: 12px;
+}
+
+.modal-actions {
+    margin-top: 18px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* === УСТАРЕВШИЕ ЗАПИСИ === */
+.card[data-status="superseded"] {
+    opacity: 0.55;
+}
+.card[data-status="superseded"]::after {
+    content: "устарело";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-family: var(--sans);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--warn);
+    background: rgba(232, 154, 10, .12);
+    padding: 2px 6px;
+    border-radius: var(--r-pill);
+}
+
+/* Плашка "это правило устарело" в модалке просмотра */
+.modal-superseded {
+    background: rgba(232, 154, 10, .08);
+    border-left: 3px solid var(--warn);
+    padding: 12px 16px;
+    border-radius: var(--r-input);
+    margin-bottom: 16px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--t1);
+    line-height: 1.5;
+}
+.modal-superseded strong { color: var(--warn); }
+.modal-superseded a {
+    color: var(--acc);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Блок "эта запись заменяет" */
+.modal-replaces {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--surf-2);
+    border-radius: var(--r-input);
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--t2);
+    line-height: 1.6;
+}
+.modal-replaces-title {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--t1);
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+.modal-replaces a {
+    color: var(--acc);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Чип "устарело" в фильтрах — оранжевый при активном */
+.chip[data-priority="устарело"].active {
+    background: var(--warn);
+    color: #fff;
+    border-color: var(--warn);
+}
+
+/* === МОДАЛКА КОНФЛИКТА (похожие при сохранении) === */
+.conflict-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0 18px;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+.conflict-item {
+    padding: 12px 14px;
+    background: var(--surf-2);
+    border-radius: var(--r-input);
+    border: 1px solid var(--brd);
+    cursor: pointer;
+    transition: border-color .15s var(--ease-soft), background .15s var(--ease-soft);
+}
+.conflict-item:hover {
+    border-color: var(--acc);
+    background: var(--acc-bg);
+}
+.conflict-item-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--t1);
+    letter-spacing: -.2px;
+    margin-bottom: 4px;
+}
+.conflict-item-meta {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--t2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+.conflict-item-body {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--t2);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.conflict-intro {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--t2);
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+
+/* === МОДАЛКА ПОИСКА КОНФЛИКТОВ === */
+.conflicts-group {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--brd);
+}
+.conflicts-group:last-child { border-bottom: none; }
+.conflicts-group-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--t1);
+    margin-bottom: 10px;
+    letter-spacing: -.2px;
+}
+.conflicts-group-meta {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--t2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+.conflicts-empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--t2);
+    font-family: var(--sans);
+    font-size: 14px;
+}
+
+
+.form-modal {
+    padding: 8px 20px 24px;
+}
+.form-modal h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    margin-bottom: 16px;
+    letter-spacing: -.3px;
+    color: var(--t1);
+}
+.form-row { margin-bottom: 12px; }
+.form-row label {
+    display: block;
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--t2);
+    margin-bottom: 5px;
+}
+.form-row input,
+.form-row textarea,
+.form-row select {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 15px;
+    padding: 11px 12px;
+    border: 1px solid var(--brd);
+    border-radius: var(--r-input);
+    background: var(--bg);
+    color: var(--t1);
+    outline: none;
+    transition: border-color .15s var(--ease-soft), box-shadow .15s var(--ease-soft);
+    letter-spacing: -.1px;
+}
+.form-row input:focus,
+.form-row textarea:focus,
+.form-row select:focus {
+    border-color: var(--acc);
+    box-shadow: 0 0 0 3px var(--acc-bg);
+}
+.form-row textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: var(--sans);
+    line-height: 1.5;
+}
+.form-row-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    justify-content: flex-end;
+}
+
+/* === МЕНЮ (список действий) === */
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+}
+.menu-item {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px 14px;
+    border-radius: var(--r-input);
+    border: none;
+    background: transparent;
+    color: var(--t1);
+    cursor: pointer;
+    text-align: left;
+    transition: background .15s var(--ease-soft);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -.1px;
+}
+.menu-item:hover { background: var(--surf-2); }
+.menu-item:active { transform: scale(.99); }
+.menu-item.danger { color: var(--danger); }
+.menu-item svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}
+.menu-divider {
+    height: 1px;
+    background: var(--brd);
+    margin: 6px 0;
+}
+
+/* === ПУСТОЕ СОСТОЯНИЕ === */
+.empty {
+    text-align: center;
+    padding: 60px 20px;
+    grid-column: 1 / -1;
+    color: var(--t2);
+}
+.empty-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    opacity: 0.4;
+}
+.empty-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--t1);
+    letter-spacing: -.3px;
+    margin-bottom: 6px;
+}
+
+/* === ТОСТ === */
+.toast {
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--t1);
+    color: var(--bg);
+    padding: 9px 20px;
+    border-radius: var(--r-pill);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 8px 20px rgba(30, 25, 10, .12);
+    z-index: 300;
+    transition: transform .25s var(--ease-soft), opacity .25s var(--ease-soft);
+    opacity: 0;
+    pointer-events: none;
+    letter-spacing: .2px;
+    white-space: nowrap;
+}
+.toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* === АДАПТИВ === */
+@media (min-width: 600px) {
+    .modal-backdrop {
+        align-items: center;
+    }
+    .modal {
+        border-radius: var(--r-card);
+        max-width: 600px;
+        margin: 0 20px;
+        animation: fadeIn .25s var(--ease-soft);
+    }
+    .modal::before { display: none; }
+}
+
+/* Ноутбук — 3 колонки */
+@media (min-width: 1000px) {
+    .feed {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+}
+
+@media (max-width: 600px) {
+    html, body { font-size: 16px; }
+    .brand-title { font-size: 22px; }
+    .brand-sub { font-size: 11px; }
+    .feed {
+        grid-template-columns: 1fr;
+        padding: 12px 14px 100px;
+        gap: 10px;
+    }
+    .header { padding: 12px 14px 10px; }
+    .filters { padding: 12px 14px 0; }
+    .stats { padding: 0 14px; }
+    .card { padding: 13px 15px 12px; }
+    .card-title { font-size: 17px; }
+    .card-content { font-size: 13.5px; }
+    .mode-btn { font-size: 12px; padding: 5px 10px; }
+    .header-row { gap: 8px; }
+    .header-actions { gap: 2px; }
+}
+
+/* Скроллбары: скрыты на сенсорных устройствах (по Surf),
+   тонкие и ненавязчивые на десктопе (с мышью) */
+@media (hover: hover) and (pointer: fine) {
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--brd-2);
+        border-radius: 100px;
+        border: 2px solid var(--bg);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--t3);
+    }
+    * { scrollbar-width: thin; scrollbar-color: var(--brd-2) transparent; }
+}
+@media (hover: none) {
+    ::-webkit-scrollbar { display: none; }
+    * { scrollbar-width: none; }
+}
+
+/* Кастомный фокус (по Surf — не дефолтный outline) */
+:focus-visible {
+    outline: none;
+}
+button:focus-visible,
+.chip:focus-visible {
+    box-shadow: 0 0 0 3px var(--acc-bg);
+}
+
+/* === МЕДИА-СЛОЙ (фото узла) === */
+
+/* Фото внутри модалки просмотра */
+.entry-photo {
+    margin: 4px 0 18px;
+    border-radius: var(--r-card);
+    overflow: hidden;
+    border: 1px solid var(--brd);
+    background: var(--surf-2);
+    cursor: zoom-in;
+    position: relative;
+}
+.entry-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
+    background: var(--surf);
+}
+.entry-photo-caption {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--t2);
+    padding: 8px 14px 10px;
+    line-height: 1.45;
+    border-top: 1px solid var(--brd);
+}
+/* Плейсхолдер пока фото грузится из базы */
+.entry-photo-loading {
+    padding: 28px 14px;
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--t3);
+}
+
+/* Мини-превью фото на карточке ленты */
+.card-photo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--t2);
+}
+.card-photo-badge svg {
+    width: 13px; height: 13px;
+    stroke: currentColor; stroke-width: 2;
+    fill: none; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* Прикрепление фото в форме */
+.photo-attach {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.photo-attach-btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 11px 14px;
+    border-radius: var(--r-input);
+    border: 1px dashed var(--brd-2);
+    background: var(--surf-2);
+    color: var(--t2);
+    cursor: pointer;
+    transition: all .15s var(--ease-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: -.1px;
+}
+.photo-attach-btn:hover { border-color: var(--acc); color: var(--acc); background: var(--acc-bg); }
+.photo-attach-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.photo-preview {
+    position: relative;
+    border-radius: var(--r-input);
+    overflow: hidden;
+    border: 1px solid var(--brd);
+}
+.photo-preview img { display: block; width: 100%; height: auto; max-height: 200px; object-fit: contain; background: var(--surf); }
+.photo-preview-remove {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(20,18,10,.55);
+    backdrop-filter: blur(4px);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+.photo-preview-remove svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+
+/* Лайтбокс — полноэкранный просмотр фото */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(20,18,10,.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn .2s var(--ease-soft);
+}
+html.dark .lightbox { background: rgba(0,0,0,.88); }
+.lightbox.visible { display: flex; }
+.lightbox img {
+    max-width: 100%;
+    max-height: 88vh;
+    border-radius: var(--r-card);
+    box-shadow: var(--sh-3);
+    object-fit: contain;
+}
+.lightbox-close {
+    position: absolute;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    right: 18px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.14);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .15s var(--ease-soft);
+}
+.lightbox-close:hover { background: rgba(255,255,255,.26); }
+.lightbox-close svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+.lightbox-caption {
+    position: absolute;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90%;
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: rgba(255,255,255,.85);
+    background: rgba(20,18,10,.4);
+    padding: 6px 14px;
+    border-radius: var(--r-pill);
+}
+
+/* ======================================================== */
+/* === СТОРИС: лента кружков над фидом (как Instagram) ===== */
+/* ======================================================== */
+.stories-bar {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 14px 20px 4px;
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.stories-bar::-webkit-scrollbar { display: none; }
+.stories-bar[hidden] { display: none; }
+@media (max-width: 600px) {
+    .stories-bar { padding: 12px 14px 4px; gap: 13px; }
+}
+
+.story-bubble {
+    flex: 0 0 auto;
+    width: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    background: none; border: none; padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+.story-bubble:active { transform: scale(.94); }
+.story-bubble-ring {
+    width: 62px; height: 62px;
+    border-radius: 50%;
+    padding: 2.5px;
+    background: linear-gradient(135deg, var(--acc), #4ABDD4);
+    transition: background .2s var(--ease-soft);
+    flex-shrink: 0;
+}
+.story-bubble.seen .story-bubble-ring {
+    background: var(--brd-2);
+}
+.story-bubble-inner {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: var(--surf);
+    border: 2px solid var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    font-family: var(--serif);
+    font-size: 22px; font-weight: 500;
+    color: var(--acc);
+}
+.story-bubble.seen .story-bubble-inner { color: var(--t2); }
+.story-bubble-inner img { width: 100%; height: 100%; object-fit: cover; }
+.story-bubble-label {
+    font-family: var(--sans);
+    font-size: 11px; font-weight: 500;
+    color: var(--t2);
+    text-align: center;
+    line-height: 1.2;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.story-bubble.seen .story-bubble-label { color: var(--t3); }
+
+/* Кружок «Смотреть все» — пунктирный */
+.story-bubble.watch-all .story-bubble-ring {
+    background: none;
+    border: 2px dashed var(--brd-2);
+    padding: 0;
+    display: flex; align-items: center; justify-content: center;
+}
+.story-bubble.watch-all .story-bubble-inner {
+    border: none; background: none;
+}
+.story-bubble.watch-all svg {
+    width: 24px; height: 24px;
+    stroke: var(--acc); stroke-width: 2; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ======================================================== */
+/* === СТОРИС: полноэкранный проигрыватель ================ */
+/* ======================================================== */
+.player {
+    position: fixed;
+    inset: 0;
+    z-index: 350;
+    background: var(--bg);
+    display: none;
+    flex-direction: column;
+    animation: fadeIn .2s var(--ease-soft);
+}
+.player.visible { display: flex; }
+
+/* Прогресс-бар (полоски сверху) */
+.player-progress {
+    position: absolute;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    left: 0; right: 0;
+    z-index: 10;
+    display: flex; gap: 3px;
+    padding: 0 14px;
+}
+.player-progress-item {
+    flex: 1; height: 2.5px;
+    border-radius: 100px;
+    background: var(--brd-2);
+    overflow: hidden;
+}
+.player-progress-item.viewed { background: var(--t1); }
+.player-progress-item.active { background: var(--acc); }
+
+.player-counter {
+    position: absolute;
+    top: calc(20px + env(safe-area-inset-top, 0px));
+    left: 18px; z-index: 11;
+    font-family: var(--sans);
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .5px;
+    color: var(--t3);
+}
+.player-close {
+    position: absolute;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    right: 16px; z-index: 11;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--surf-2);
+    border: none; color: var(--t1);
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+.player-close svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+
+/* Трек слайдов */
+.player-track {
+    display: flex;
+    height: 100%;
+    transition: transform .4s var(--ease-soft);
+    will-change: transform;
+}
+.player-slide {
+    min-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 64px 22px 40px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.player-slide::-webkit-scrollbar { display: none; }
+
+/* Зоны тапа влево/вправо */
+.player-navzone {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 33%;
+    z-index: 5;
+}
+.player-navzone.left { left: 0; }
+.player-navzone.right { right: 0; }
+
+/* Слайд: обложка / контент / финал */
+.ps-tag {
+    font-family: var(--sans);
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .6px;
+    color: var(--acc);
+    margin-bottom: 10px;
+}
+.ps-title {
+    font-family: var(--serif);
+    font-size: 28px; font-weight: 500;
+    line-height: 1.18; letter-spacing: -.4px;
+    color: var(--t1);
+    margin-bottom: 6px;
+}
+.ps-sub {
+    font-family: var(--sans);
+    font-size: 14px; color: var(--t2);
+    margin-bottom: 20px; line-height: 1.4;
+}
+.ps-photo {
+    border-radius: var(--r-card);
+    overflow: hidden;
+    border: 1px solid var(--brd);
+    margin-bottom: 18px;
+    cursor: zoom-in;
+    background: var(--surf);
+    max-height: 42vh;
+    display: flex; align-items: center; justify-content: center;
+}
+.ps-photo img { width: 100%; height: auto; max-height: 42vh; object-fit: contain; display: block; }
+.ps-card {
+    background: var(--surf);
+    border: 1px solid var(--brd);
+    border-radius: var(--r-card);
+    padding: 18px 18px 20px;
+    box-shadow: var(--sh-2);
+}
+.ps-body {
+    font-family: var(--sans);
+    font-size: 16px; line-height: 1.55;
+    color: var(--t1); letter-spacing: -.1px;
+}
+.ps-insight {
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: var(--acc-bg);
+    border-radius: var(--r-input);
+    font-family: var(--sans);
+    font-size: 14px; line-height: 1.5;
+    color: var(--t1);
+    display: flex; gap: 8px;
+}
+.ps-insight-ic { color: var(--acc); flex-shrink: 0; }
+.ps-insight[data-kind="антипример"] { background: rgba(232,69,58,.08); }
+.ps-insight[data-kind="антипример"] .ps-insight-ic { color: var(--danger); }
+.ps-insight[data-kind="решение"] { background: rgba(46,189,82,.1); }
+.ps-insight[data-kind="решение"] .ps-insight-ic { color: var(--ok); }
+
+/* Обложка и финал — по центру */
+.player-slide.cover, .player-slide.final { text-align: center; align-items: center; }
+.player-slide.cover .ps-title { font-size: 34px; }
+.ps-cover-brand {
+    font-family: var(--serif);
+    font-size: 13px; color: var(--t2);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 18px;
+}
+.ps-final-note {
+    font-family: var(--sans);
+    font-size: 15px; color: var(--t2);
+    margin-top: 12px; line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-row">
+        <div class="brand">
+            <span class="brand-title">МБ База Знаний</span>
+            <span class="brand-sub">свод норм мебельного производства</span>
+        </div>
+        <div class="mode-switch" role="tablist" aria-label="Режим просмотра">
+            <button class="mode-btn active" data-mode="feed" role="tab" aria-selected="true">Лента</button>
+            <button class="mode-btn" data-mode="book" role="tab" aria-selected="false">Книга</button>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" id="btn-theme" title="Сменить тему" aria-label="Сменить тему">
+                <svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
+            </button>
+            <button class="btn-icon" id="btn-menu" title="Меню" aria-label="Меню">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg>
+            </button>
+        </div>
+    </div>
+    <div class="search-wrap">
+        <span class="search-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </span>
+        <input type="search" class="search" id="search" placeholder="Поиск: материал, элемент, фурнитура…" autocomplete="off">
+        <button class="search-clear" id="search-clear" aria-label="Очистить">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+    </div>
+</header>
+
+<div class="filters" id="filters">
+    <div class="filter-row" id="filter-categories">
+        <span class="filter-label">Категория</span>
+    </div>
+    <div class="filter-row" id="filter-priorities">
+        <span class="filter-label">Тип</span>
+    </div>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<!-- Лента кружков-сторис (над фидом, как в Instagram) -->
+<div class="stories-bar" id="stories-bar" hidden></div>
+
+<main class="feed" id="feed"></main>
+
+<!-- Режим: Книга -->
+<section class="book" id="book" hidden></section>
+
+<!-- Полноэкранный проигрыватель сторис -->
+<div class="player" id="player">
+    <div class="player-progress" id="player-progress"></div>
+    <div class="player-counter" id="player-counter"></div>
+    <button class="player-close" id="player-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="player-navzone left" id="player-nav-left"></div>
+    <div class="player-navzone right" id="player-nav-right"></div>
+    <div class="player-track" id="player-track"></div>
+</div>
+
+<!-- FAB: добавить запись -->
+<button class="fab" id="btn-add" title="Добавить запись" aria-label="Добавить запись">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- Кнопка "наверх" (видна только в режиме Книга) -->
+<button class="book-top" id="btn-top" title="Наверх" aria-label="Наверх">
+    <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<!-- Модалка просмотра записи -->
+<div class="modal-backdrop" id="modal-view">
+    <div class="modal" id="modal-view-content"></div>
+</div>
+
+<!-- Модалка добавления -->
+<div class="modal-backdrop" id="modal-add">
+    <div class="modal form-modal">
+        <button class="modal-close" onclick="closeModal('modal-add')" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <h2 id="f-form-title">Новая запись</h2>
+        <div class="form-row">
+            <label>Заголовок</label>
+            <input type="text" id="f-title" placeholder="Кратко суть нормы">
+        </div>
+        <div class="form-row">
+            <label>Содержимое</label>
+            <textarea id="f-content" placeholder="Подробное описание правила или решения"></textarea>
+        </div>
+        <div class="form-row-grid">
+            <div class="form-row">
+                <label>Категория</label>
+                <select id="f-category"></select>
+            </div>
+            <div class="form-row">
+                <label>Приоритет</label>
+                <select id="f-priority">
+                    <option value="стандарт">Стандарт</option>
+                    <option value="норма">Норма</option>
+                    <option value="антипример">Антипример</option>
+                    <option value="решение">Решение</option>
+                    <option value="рекомендация">Рекомендация</option>
+                    <option value="задача">Задача</option>
+                    <option value="обсуждается">Обсуждается</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <label>Подкатегория (необязательно)</label>
+            <input type="text" id="f-subcategory" placeholder="Например: Опоры">
+        </div>
+        <div class="form-row">
+            <label>Теги через запятую (необязательно)</label>
+            <input type="text" id="f-tags" placeholder="ЛДСП, фасады">
+        </div>
+        <div class="form-row">
+            <label>Источник</label>
+            <input type="text" id="f-source" placeholder="Совещание / решение / мой опыт">
+        </div>
+        <div class="form-row">
+            <label>Фото узла (необязательно)</label>
+            <div class="photo-attach">
+                <button type="button" class="photo-attach-btn" id="f-photo-btn">
+                    <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                    <span id="f-photo-btn-label">Прикрепить фото</span>
+                </button>
+                <div class="photo-preview" id="f-photo-preview" style="display:none;">
+                    <img id="f-photo-preview-img" src="" alt="">
+                    <button type="button" class="photo-preview-remove" id="f-photo-remove" aria-label="Убрать фото">
+                        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                </div>
+                <input type="text" id="f-photo-caption" placeholder="Подпись к фото (необязательно)" style="display:none;">
+            </div>
+        </div>
+        <!-- Поле комментария к правке — видно только при редактировании -->
+        <div class="form-row" id="f-revision-row" style="display: none;">
+            <label>Комментарий к правке (необязательно)</label>
+            <input type="text" id="f-revision-comment" placeholder="Что и зачем изменили">
+        </div>
+        <div class="form-actions">
+            <button class="btn" id="f-cancel">Отмена</button>
+            <button class="btn btn-primary" id="f-save">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модалка: возможные конфликты при сохранении -->
+<div class="modal-backdrop" id="modal-conflict">
+    <div class="modal form-modal">
+        <button class="modal-close" onclick="closeModal('modal-conflict')" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <h2>Возможный конфликт</h2>
+        <p class="conflict-intro">В базе уже есть похожие записи. Возможно, новая заменяет одну из них — кликните, чтобы пометить её устаревшей.</p>
+        <div class="conflict-list" id="conflict-list"></div>
+        <div class="form-actions">
+            <button class="btn" id="c-cancel">Отмена</button>
+            <button class="btn btn-primary" id="c-create-anyway">Это разное, всё равно создать</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модалка: поиск конфликтов в базе -->
+<div class="modal-backdrop" id="modal-conflicts">
+    <div class="modal form-modal">
+        <button class="modal-close" onclick="closeModal('modal-conflicts')" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <h2>Поиск конфликтов</h2>
+        <p class="conflict-intro">Группы записей с похожими тегами в одной категории. Возможные противоречия.</p>
+        <div id="conflicts-content"></div>
+    </div>
+</div>
+
+<!-- Меню -->
+<div class="modal-backdrop" id="modal-menu">
+    <div class="modal form-modal">
+        <button class="modal-close" id="m-close" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <h2>Меню</h2>
+        <div class="menu-list">
+            <button class="menu-item" id="m-find-conflicts">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                <span>Поиск конфликтов в базе</span>
+            </button>
+            <div class="menu-divider"></div>
+            <button class="menu-item" id="m-export-json">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                <span>Экспорт JSON (резервная копия)</span>
+            </button>
+            <button class="menu-item" id="m-export-docx">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg>
+                <span>Экспорт в Word (.docx)</span>
+            </button>
+            <button class="menu-item" id="m-import">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                <span>Импорт JSON</span>
+            </button>
+            <div class="menu-divider"></div>
+            <button class="menu-item" id="m-reload">
+                <svg viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                <span>Перезагрузить стартовый корпус</span>
+            </button>
+            <button class="menu-item danger" id="m-clear">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                <span>Очистить всё</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="file-import" accept=".json" style="display:none;">
+<input type="file" id="file-photo" accept="image/*" style="display:none;">
+
+<!-- Лайтбокс — полноэкранный просмотр фото узла -->
+<div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption" style="display:none;"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========================================================
+   МБ База Знаний — приложение
+   ======================================================== */
+
+const STORAGE_KEY = "mb_knowledge_base_v1";
+const CORPUS_URL = "./mb_corpus.json"; // загружается если нет данных в localStorage
+
+// ========================================================
+// IndexedDB — хранилище фотографий узлов
+// (текст записей живёт в localStorage, фото — здесь: до сотен МБ)
+// ========================================================
+const PhotoDB = {
+    db: null,
+    DB_NAME: "mb_kb_media",
+    STORE: "photos",
+
+    async init() {
+        return new Promise((resolve) => {
+            try {
+                const req = indexedDB.open(this.DB_NAME, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(this.STORE)) {
+                        db.createObjectStore(this.STORE, { keyPath: "id" });
+                    }
+                };
+                req.onsuccess = () => { this.db = req.result; resolve(true); };
+                req.onerror = () => { console.warn("IndexedDB недоступна"); resolve(false); };
+            } catch (e) { resolve(false); }
+        });
+    },
+
+    // dataUrl — строка base64 (image/jpeg). id = id записи.
+    async save(id, dataUrl, caption) {
+        if (!this.db) return;
+        return new Promise((resolve, reject) => {
+            const tx = this.db.transaction(this.STORE, "readwrite");
+            tx.objectStore(this.STORE).put({ id, dataUrl, caption: caption || "" });
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        });
+    },
+
+    async get(id) {
+        if (!this.db) return null;
+        return new Promise((resolve) => {
+            const tx = this.db.transaction(this.STORE, "readonly");
+            const r = tx.objectStore(this.STORE).get(id);
+            r.onsuccess = () => resolve(r.result || null);
+            r.onerror = () => resolve(null);
+        });
+    },
+
+    async delete(id) {
+        if (!this.db) return;
+        return new Promise((resolve) => {
+            const tx = this.db.transaction(this.STORE, "readwrite");
+            tx.objectStore(this.STORE).delete(id);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+        });
+    },
+
+    async allIds() {
+        if (!this.db) return [];
+        return new Promise((resolve) => {
+            const tx = this.db.transaction(this.STORE, "readonly");
+            const r = tx.objectStore(this.STORE).getAllKeys();
+            r.onsuccess = () => resolve(r.result || []);
+            r.onerror = () => resolve([]);
+        });
+    }
+};
+
+// Сжатие выбранного файла до ~1400px по длинной стороне, JPEG 0.82
+function compressImage(file, maxSide = 1400, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const img = new Image();
+            img.onload = () => {
+                let { width, height } = img;
+                if (Math.max(width, height) > maxSide) {
+                    if (width >= height) { height = Math.round(height * maxSide / width); width = maxSide; }
+                    else { width = Math.round(width * maxSide / height); height = maxSide; }
+                }
+                const canvas = document.createElement("canvas");
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL("image/jpeg", quality));
+            };
+            img.onerror = reject;
+            img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Буфер фото текущей редактируемой записи (до сохранения)
+let pendingPhoto = null;   // { dataUrl, caption } | null
+let pendingPhotoCleared = false; // true если у записи было фото и его убрали
+
+let state = {
+    records: [],
+    mode: "feed",  // "feed" | "book"
+    filter: {
+        text: "",
+        categories: new Set(),
+        priorities: new Set()
+    }
+};
+
+// === РУССКИЙ СТЕММИНГ (упрощённый Snowball-like) ===
+// Цель: "столешница / столешки / столешку" → один корень
+const RU_PREFIXES = ["наи", "наи"];
+const RU_PERFECTIVE = /(?:ив|ивши|ившись|ыв|ывши|ывшись|в|вши|вшись)$/;
+const RU_ADJECTIVE = /(?:ее|ие|ые|ое|ими|ыми|ей|ий|ый|ой|ем|им|ым|ом|его|ого|ему|ому|их|ых|ую|юю|ая|яя|ою|ею)$/;
+const RU_REFLEXIVE = /(?:ся|сь)$/;
+const RU_VERB = /(?:ла|на|ете|йте|ли|й|л|ем|н|ло|но|ет|ют|ны|ть|ешь|ете|ите|ют|ят|ем|им|ым|ыми|ою|ею|нно)$/;
+const RU_NOUN = /(?:а|ев|ов|ие|ье|е|иями|ями|ами|еи|ии|и|ией|ей|ой|ий|й|иям|ям|ием|ем|ам|ом|о|у|ах|иях|ях|ы|ь|ию|ью|ю|ия|ья|я)$/;
+const RU_SUPERLATIVE = /(?:ейш|ейше)$/;
+const RU_DERIVATIONAL = /(?:ост|ость)$/;
+
+function stem(word) {
+    if (!word || word.length < 4) return word.toLowerCase();
+    let w = word.toLowerCase().replace(/ё/g, "е");
+    
+    // Удаляем рефлексив
+    w = w.replace(RU_REFLEXIVE, "");
+    
+    // Удаляем окончания (порядок важен)
+    let prev = w;
+    w = w.replace(RU_PERFECTIVE, "");
+    if (w === prev) w = w.replace(RU_ADJECTIVE, "");
+    if (w === prev) w = w.replace(RU_VERB, "");
+    if (w === prev) w = w.replace(RU_NOUN, "");
+    
+    // Удаляем -ость
+    w = w.replace(RU_DERIVATIONAL, "");
+    
+    // Удаляем превосходную степень
+    w = w.replace(RU_SUPERLATIVE, "");
+    
+    // Финальная й/ь
+    w = w.replace(/[йь]$/, "");
+    
+    return w.length >= 2 ? w : word.toLowerCase();
+}
+
+function tokenize(text) {
+    if (!text) return [];
+    return text.toLowerCase()
+        .replace(/ё/g, "е")
+        .split(/[^a-zа-я0-9]+/)
+        .filter(t => t && t.length > 1);
+}
+
+function stemmedTokens(text) {
+    return tokenize(text).map(stem);
+}
+
+// === ХРАНИЛИЩЕ ===
+function loadFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (e) { console.error("Load error:", e); }
+    return null;
+}
+
+function saveToStorage() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.records));
+    } catch (e) {
+        toast("Не удалось сохранить (возможно, нет места)");
+    }
+}
+
+async function loadCorpus() {
+    try {
+        const resp = await fetch(CORPUS_URL);
+        if (resp.ok) {
+            const data = await resp.json();
+            return data;
+        }
+    } catch (e) {
+        console.warn("Корпус не найден на сервере:", e);
+    }
+    return null;
+}
+
+// === ИНИЦИАЛИЗАЦИЯ ===
+async function init() {
+    loadTheme();
+    await PhotoDB.init();
+    let records = loadFromStorage();
+    
+    if (!records || records.length === 0) {
+        records = await loadCorpus();
+        if (records) {
+            state.records = records;
+            saveToStorage();
+            toast(`Загружен стартовый корпус: ${records.length} записей`);
+        } else {
+            state.records = [];
+        }
+    } else {
+        state.records = records;
+    }
+    
+    renderFilters();
+    renderFeed();
+    bindEvents();
+    await loadStoriesManifest();
+    loadMode();
+    if (state.mode === "feed") renderStoriesBar();
+}
+
+// === ФИЛЬТРЫ ===
+function getCategoryCounts() {
+    const counts = {};
+    state.records.forEach(r => {
+        if (r.status === "superseded") return; // устаревшие не считаем в категориях
+        counts[r.category] = (counts[r.category] || 0) + 1;
+    });
+    return counts;
+}
+
+function getPriorityCounts() {
+    const counts = {};
+    state.records.forEach(r => {
+        if (r.status === "superseded") return; // устаревшие — отдельным счётчиком
+        const p = r.priority || r.type;
+        counts[p] = (counts[p] || 0) + 1;
+    });
+    return counts;
+}
+
+function getSupersededCount() {
+    return state.records.filter(r => r.status === "superseded").length;
+}
+
+const PRIORITY_ORDER = ["стандарт", "норма", "антипример", "решение", "рекомендация", "задача", "обсуждается"];
+
+// Циклическая палитра категорий (Surf Design System §2)
+const CATEGORY_PALETTE = ["#A855C7", "#D98A08", "#2EBD52", "#E8453A", "#1A7AE6", "#4ABDD4", "#B09A20", "#A68960"];
+
+function categoryColor(name) {
+    if (!name) return "#A68960";
+    // Стабильный хэш строки → индекс в палитре
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0;
+    return CATEGORY_PALETTE[Math.abs(h) % CATEGORY_PALETTE.length];
+}
+
+function renderFilters() {
+    const catCounts = getCategoryCounts();
+    const catEl = document.getElementById("filter-categories");
+    catEl.innerHTML = '<span class="filter-label">Категория</span>';
+    
+    const cats = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a]);
+    cats.forEach(cat => {
+        const chip = document.createElement("button");
+        chip.className = "chip" + (state.filter.categories.has(cat) ? " active" : "");
+        chip.style.setProperty('--chip-color', categoryColor(cat));
+        chip.innerHTML = `<span class="chip-dot"></span>${cat}<span class="chip-count">${catCounts[cat]}</span>`;
+        chip.onclick = () => toggleFilter("categories", cat);
+        catEl.appendChild(chip);
+    });
+    
+    const prCounts = getPriorityCounts();
+    const prEl = document.getElementById("filter-priorities");
+    prEl.innerHTML = '<span class="filter-label">Тип</span>';
+    
+    PRIORITY_ORDER.forEach(p => {
+        if (!prCounts[p]) return;
+        const chip = document.createElement("button");
+        chip.className = "chip" + (state.filter.priorities.has(p) ? " active" : "");
+        chip.setAttribute("data-priority", p);
+        chip.innerHTML = `${p}<span class="chip-count">${prCounts[p]}</span>`;
+        chip.onclick = () => toggleFilter("priorities", p);
+        prEl.appendChild(chip);
+    });
+    
+    // Чип "устарело" — отдельно, если есть устаревшие записи
+    const supersededCount = getSupersededCount();
+    if (supersededCount > 0) {
+        const chip = document.createElement("button");
+        chip.className = "chip" + (state.filter.priorities.has("устарело") ? " active" : "");
+        chip.setAttribute("data-priority", "устарело");
+        chip.innerHTML = `устарело<span class="chip-count">${supersededCount}</span>`;
+        chip.onclick = () => toggleFilter("priorities", "устарело");
+        prEl.appendChild(chip);
+    }
+}
+
+function toggleFilter(type, value) {
+    const set = state.filter[type];
+    if (set.has(value)) set.delete(value);
+    else set.add(value);
+    renderFilters();
+    renderFeed();
+}
+
+// === ПОИСК ===
+function matchesText(record, query) {
+    if (!query) return { ok: true, matched: [] };
+    
+    const queryTokens = stemmedTokens(query);
+    if (queryTokens.length === 0) return { ok: true, matched: [] };
+    
+    // Подготовим стемы из записи
+    const haystack = [
+        record.title || "",
+        record.content || "",
+        (record.tags || []).join(" "),
+        record.subcategory || "",
+        record.category || ""
+    ].join(" ");
+    
+    const recTokens = new Set(stemmedTokens(haystack));
+    
+    // Все токены из запроса должны быть найдены (AND-семантика)
+    const matched = [];
+    for (const qt of queryTokens) {
+        let found = false;
+        for (const rt of recTokens) {
+            if (rt.startsWith(qt) || qt.startsWith(rt)) {
+                found = true;
+                matched.push(qt);
+                break;
+            }
+        }
+        if (!found) return { ok: false, matched: [] };
+    }
+    
+    return { ok: true, matched };
+}
+
+function filterRecords() {
+    const showOnlySuperseded = state.filter.priorities.has("устарело");
+    
+    return state.records.filter(r => {
+        const isSuperseded = r.status === "superseded";
+        
+        // Спецлогика устаревших:
+        // - если активен чип "устарело" — показываем ТОЛЬКО устаревшие
+        // - иначе — устаревшие скрыты
+        if (showOnlySuperseded) {
+            if (!isSuperseded) return false;
+        } else {
+            if (isSuperseded) return false;
+        }
+        
+        // Фильтр по категории
+        if (state.filter.categories.size > 0 && !state.filter.categories.has(r.category)) {
+            return false;
+        }
+        // Фильтр по приоритету (исключаем "устарело" — это не приоритет, а статус)
+        const p = r.priority || r.type;
+        const activePriorities = new Set([...state.filter.priorities].filter(x => x !== "устарело"));
+        if (activePriorities.size > 0 && !activePriorities.has(p)) {
+            return false;
+        }
+        // Поиск по тексту
+        if (state.filter.text) {
+            const m = matchesText(r, state.filter.text);
+            if (!m.ok) return false;
+        }
+        return true;
+    });
+}
+
+// === ПОДСВЕТКА СОВПАДЕНИЙ ===
+function highlight(text, query) {
+    if (!query || !text) return escapeHtml(text);
+    const queryTokens = tokenize(query);
+    if (queryTokens.length === 0) return escapeHtml(text);
+    
+    let result = escapeHtml(text);
+    // Подсветка слов, которые НАЧИНАЮТСЯ с токена запроса (имитация морфологии)
+    queryTokens.forEach(qt => {
+        if (qt.length < 2) return;
+        const re = new RegExp(`(${escapeRegex(qt)}[а-яё]*)`, "giu");
+        result = result.replace(re, '<mark>$1</mark>');
+    });
+    return result;
+}
+
+function escapeHtml(s) {
+    if (!s) return "";
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function escapeRegex(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// === РЕНДЕР ЛЕНТЫ ===
+function renderFeed() {
+    const feed = document.getElementById("feed");
+    const filtered = filterRecords();
+    const query = state.filter.text;
+    
+    document.getElementById("stats").innerHTML = 
+        `Показано <strong>${filtered.length}</strong> из <strong>${state.records.length}</strong> записей`;
+    
+    if (filtered.length === 0) {
+        feed.innerHTML = `
+            <div class="empty">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                </div>
+                <div class="empty-title">Ничего не найдено</div>
+                <div>Попробуйте изменить запрос или сбросить фильтры</div>
+            </div>
+        `;
+        return;
+    }
+    
+    feed.innerHTML = filtered.map(r => {
+        const priority = r.priority || r.type;
+        const tags = (r.tags || []).slice(0, 4);
+        const catColor = categoryColor(r.category);
+        const statusAttr = r.status === "superseded" ? ' data-status="superseded"' : "";
+        return `
+            <article class="card" data-priority="${escapeHtml(priority)}" data-id="${escapeHtml(r.id)}"${statusAttr} style="--cat-color:${catColor};">
+                <div class="card-meta">
+                    <span class="card-priority">${escapeHtml(priority)}</span>
+                    <span class="card-cat"><span class="card-cat-dot"></span>${escapeHtml(r.category || "")}${r.subcategory ? " · " + escapeHtml(r.subcategory) : ""}</span>
+                </div>
+                <h3 class="card-title">${highlight(r.title, query)}</h3>
+                <div class="card-content">${highlight(r.content, query)}</div>
+                <div class="card-footer">
+                    ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
+                    ${r.hasPhoto ? `<span class="card-photo-badge"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>фото</span>` : ""}
+                </div>
+            </article>
+        `;
+    }).join("");
+    
+    // Клики по карточкам
+    feed.querySelectorAll(".card").forEach(card => {
+        card.onclick = () => openRecord(card.dataset.id);
+    });
+}
+
+// === МОДАЛКА ПРОСМОТРА ЗАПИСИ ===
+function openRecord(id) {
+    const r = state.records.find(x => x.id === id);
+    if (!r) return;
+    
+    const priority = r.priority || r.type;
+    const content = document.getElementById("modal-view-content");
+    const tags = r.tags || [];
+    const links = r.links || [];
+    
+    // Преобразуем ссылки внутри content в кликабельные
+    let contentHtml = escapeHtml(r.content);
+    contentHtml = contentHtml.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    
+    // Плашка "устарело" — если эта запись заменена другой
+    let supersededHtml = "";
+    if (r.status === "superseded" && r.replacedBy) {
+        const newer = state.records.find(x => x.id === r.replacedBy);
+        if (newer) {
+            supersededHtml = `
+                <div class="modal-superseded">
+                    <strong>Это правило устарело.</strong> Актуальная версия: 
+                    <a onclick="closeModal('modal-view'); setTimeout(() => openRecord('${newer.id}'), 100);">${escapeHtml(newer.title)}</a>
+                </div>
+            `;
+        } else {
+            supersededHtml = `<div class="modal-superseded"><strong>Это правило устарело.</strong></div>`;
+        }
+    }
+    
+    // Блок "эта запись заменяет"
+    let replacesHtml = "";
+    if (r.replaces && r.replaces.length > 0) {
+        const replacedRecords = r.replaces
+            .map(oldId => state.records.find(x => x.id === oldId))
+            .filter(Boolean);
+        if (replacedRecords.length > 0) {
+            replacesHtml = `
+                <div class="modal-replaces">
+                    <div class="modal-replaces-title">Эта запись заменяет:</div>
+                    ${replacedRecords.map(old => 
+                        `<a onclick="closeModal('modal-view'); setTimeout(() => openRecord('${old.id}'), 100);">${escapeHtml(old.title)}</a>`
+                    ).join("<br>")}
+                </div>
+            `;
+        }
+    }
+    
+    content.innerHTML = `
+        <button class="modal-close" onclick="closeModal('modal-view')" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="modal-content">
+            ${supersededHtml}
+            <div class="modal-meta">
+                <span class="modal-priority" style="--modal-pr-color: ${priorityColor(priority)};">${escapeHtml(priority)}</span>
+                <span class="modal-meta-sep">·</span>
+                <span>${escapeHtml(r.category)}</span>
+                ${r.subcategory ? `<span class="modal-meta-sep">·</span><span>${escapeHtml(r.subcategory)}</span>` : ""}
+            </div>
+            <h2 class="modal-title">${escapeHtml(r.title)}</h2>
+            ${r.hasPhoto ? `<div class="entry-photo" id="view-photo-${r.id}" data-photo-id="${r.id}"><div class="entry-photo-loading">Загрузка фото…</div></div>` : ""}
+            <div class="modal-body">${contentHtml}</div>
+            
+            ${tags.length > 0 ? `
+                <div class="modal-section">
+                    <div class="modal-section-label">Теги</div>
+                    <div class="modal-tags">
+                        ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
+                    </div>
+                </div>
+            ` : ""}
+            
+            <div class="modal-section">
+                <div class="modal-section-label">Источник</div>
+                <div class="modal-source">
+                    ${escapeHtml(r.source || "—")}
+                    ${r.sourceDate ? `<br><em>${escapeHtml(r.sourceDate)}</em>` : ""}
+                </div>
+            </div>
+            
+            ${replacesHtml}
+            
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="editRecord('${r.id}')">Редактировать</button>
+                <button class="btn" onclick="copyRecord('${r.id}')">Копировать текст</button>
+                <button class="btn btn-danger" onclick="deleteRecord('${r.id}')">Удалить</button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById("modal-view").classList.add("visible");
+
+    // Lazy-загрузка фото из IndexedDB
+    if (r.hasPhoto) {
+        PhotoDB.get(r.id).then(rec => {
+            const box = document.getElementById("view-photo-" + r.id);
+            if (!box) return;
+            if (rec && rec.dataUrl) {
+                box.innerHTML = `<img src="${rec.dataUrl}" alt="${escapeHtml(rec.caption || r.title)}">` +
+                    (rec.caption ? `<div class="entry-photo-caption">${escapeHtml(rec.caption)}</div>` : "");
+                box.onclick = () => openLightbox(rec.dataUrl, rec.caption);
+            } else {
+                box.remove();
+            }
+        });
+    }
+}
+
+// === ЛАЙТБОКС ===
+function openLightbox(dataUrl, caption) {
+    const lb = document.getElementById("lightbox");
+    document.getElementById("lightbox-img").src = dataUrl;
+    const cap = document.getElementById("lightbox-caption");
+    if (caption) { cap.textContent = caption; cap.style.display = ""; }
+    else { cap.style.display = "none"; }
+    lb.classList.add("visible");
+}
+function closeLightbox() {
+    document.getElementById("lightbox").classList.remove("visible");
+    document.getElementById("lightbox-img").src = "";
+}
+
+function priorityColor(p) {
+    const map = {
+        "стандарт": "var(--t2)",
+        "норма": "var(--t2)",
+        "антипример": "var(--danger)",
+        "решение": "var(--ok)",
+        "задача": "var(--warn)",
+        "рекомендация": "var(--t2)",
+        "обсуждается": "var(--acc)"
+    };
+    return map[p] || "var(--t2)";
+}
+
+function priorityCssVar(p) {
+    const map = {
+        "стандарт": "standard",
+        "норма": "norm",
+        "антипример": "anti",
+        "решение": "decision",
+        "задача": "task",
+        "рекомендация": "rec",
+        "обсуждается": "discuss"
+    };
+    return map[p] || "norm";
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove("visible");
+}
+
+window.closeModal = closeModal;
+window.copyRecord = function(id) {
+    const r = state.records.find(x => x.id === id);
+    if (!r) return;
+    const text = `${r.title}\n\n${r.content}\n\n— ${r.source}`;
+    navigator.clipboard.writeText(text).then(() => toast("Текст скопирован"));
+};
+window.editRecord = function(id) {
+    const r = state.records.find(x => x.id === id);
+    if (!r) return;
+    closeModal("modal-view");
+    openAddModal(r);
+};
+window.deleteRecord = function(id) {
+    if (!confirm("Удалить запись?")) return;
+    PhotoDB.delete(id);
+    state.records = state.records.filter(x => x.id !== id);
+    saveToStorage();
+    closeModal("modal-view");
+    renderFilters();
+    if (state.mode === "book") renderBook();
+    else renderFeed();
+    toast("Запись удалена");
+};
+
+// === ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ ЗАПИСИ ===
+// Если editingId установлен — форма работает в режиме редактирования
+let editingId = null;
+
+function openAddModal(recordToEdit) {
+    // Заполнить категории
+    const cats = [...new Set(state.records.map(r => r.category))].sort();
+    if (cats.length === 0) cats.push("разное");
+    const sel = document.getElementById("f-category");
+    sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+    
+    const titleEl = document.getElementById("f-form-title");
+    const revisionRow = document.getElementById("f-revision-row");
+    const revisionInput = document.getElementById("f-revision-comment");
+    
+    if (recordToEdit) {
+        // === РЕЖИМ РЕДАКТИРОВАНИЯ ===
+        editingId = recordToEdit.id;
+        titleEl.textContent = "Редактировать запись";
+        revisionRow.style.display = "";
+        revisionInput.value = "";
+        
+        document.getElementById("f-title").value = recordToEdit.title || "";
+        document.getElementById("f-content").value = recordToEdit.content || "";
+        document.getElementById("f-subcategory").value = recordToEdit.subcategory || "";
+        document.getElementById("f-tags").value = (recordToEdit.tags || []).join(", ");
+        document.getElementById("f-source").value = recordToEdit.source || "";
+        document.getElementById("f-priority").value = recordToEdit.priority || recordToEdit.type || "стандарт";
+        
+        // Выставляем категорию (если её нет в списке — добавим как option)
+        const catSel = document.getElementById("f-category");
+        if (recordToEdit.category && !cats.includes(recordToEdit.category)) {
+            const opt = document.createElement("option");
+            opt.value = recordToEdit.category;
+            opt.textContent = recordToEdit.category;
+            catSel.appendChild(opt);
+        }
+        catSel.value = recordToEdit.category || cats[0];
+
+        // Фото: если у записи есть — показываем превью из базы
+        resetPhotoField();
+        if (recordToEdit.hasPhoto) {
+            PhotoDB.get(recordToEdit.id).then(rec => {
+                if (rec && rec.dataUrl) showPhotoPreview(rec.dataUrl, rec.caption || "", false);
+            });
+        }
+    } else {
+        // === РЕЖИМ СОЗДАНИЯ ===
+        editingId = null;
+        titleEl.textContent = "Новая запись";
+        revisionRow.style.display = "none";
+        revisionInput.value = "";
+        
+        document.getElementById("f-title").value = "";
+        document.getElementById("f-content").value = "";
+        document.getElementById("f-subcategory").value = "";
+        document.getElementById("f-tags").value = "";
+        document.getElementById("f-source").value = "Моя запись";
+        document.getElementById("f-priority").value = "стандарт";
+        resetPhotoField();
+    }
+    
+    document.getElementById("modal-add").classList.add("visible");
+    setTimeout(() => document.getElementById("f-title").focus(), 100);
+}
+
+// --- Управление полем фото в форме ---
+function resetPhotoField() {
+    pendingPhoto = null;
+    pendingPhotoCleared = false;
+    document.getElementById("f-photo-preview").style.display = "none";
+    document.getElementById("f-photo-preview-img").src = "";
+    const cap = document.getElementById("f-photo-caption");
+    cap.style.display = "none";
+    cap.value = "";
+    document.getElementById("f-photo-btn-label").textContent = "Прикрепить фото";
+}
+
+function showPhotoPreview(dataUrl, caption, isNew) {
+    document.getElementById("f-photo-preview-img").src = dataUrl;
+    document.getElementById("f-photo-preview").style.display = "";
+    const cap = document.getElementById("f-photo-caption");
+    cap.style.display = "";
+    cap.value = caption || "";
+    document.getElementById("f-photo-btn-label").textContent = "Заменить фото";
+    if (isNew) { pendingPhoto = { dataUrl, caption: caption || "" }; pendingPhotoCleared = false; }
+}
+
+async function onPhotoSelected(file) {
+    if (!file) return;
+    try {
+        toast("Обработка фото…");
+        const dataUrl = await compressImage(file);
+        showPhotoPreview(dataUrl, document.getElementById("f-photo-caption").value, true);
+    } catch (e) {
+        toast("Не удалось загрузить фото");
+    }
+}
+
+function removePhotoField() {
+    pendingPhoto = null;
+    pendingPhotoCleared = true; // помечаем, что фото надо удалить из базы при сохранении
+    document.getElementById("f-photo-preview").style.display = "none";
+    document.getElementById("f-photo-preview-img").src = "";
+    const cap = document.getElementById("f-photo-caption");
+    cap.style.display = "none";
+    cap.value = "";
+    document.getElementById("f-photo-btn-label").textContent = "Прикрепить фото";
+}
+
+// Временное хранилище данных будущей записи во время диалога конфликта
+let pendingNewRecord = null;
+
+function saveNewRecord() {
+    const title = document.getElementById("f-title").value.trim();
+    const content = document.getElementById("f-content").value.trim();
+    
+    if (!title || !content) {
+        toast("Заполните заголовок и содержимое");
+        return;
+    }
+    
+    const today = new Date().toISOString().slice(0, 10);
+    const priority = document.getElementById("f-priority").value;
+    const category = document.getElementById("f-category").value;
+    const subcategory = document.getElementById("f-subcategory").value.trim();
+    const tags = document.getElementById("f-tags").value.split(",").map(t => t.trim()).filter(Boolean);
+    const source = document.getElementById("f-source").value.trim() || "Моя запись";
+    const links = (content.match(/https?:\/\/[^\s]+/g) || []);
+    
+    if (editingId) {
+        // === ОБНОВЛЯЕМ СУЩЕСТВУЮЩУЮ ===
+        const idx = state.records.findIndex(r => r.id === editingId);
+        if (idx === -1) {
+            toast("Запись не найдена");
+            editingId = null;
+            return;
+        }
+        const existing = state.records[idx];
+        const revisionComment = document.getElementById("f-revision-comment").value.trim();
+        
+        // Формируем запись о правке (всегда фиксируем факт, комментарий опционально)
+        const revision = { date: today };
+        if (revisionComment) revision.comment = revisionComment;
+        
+        const updated = {
+            ...existing,
+            title,
+            content,
+            category,
+            subcategory,
+            tags,
+            source,
+            priority,
+            type: priority,
+            links,
+            updatedAt: today,
+            revisions: [...(existing.revisions || []), revision]
+        };
+
+        // Фото: применяем изменения буфера
+        const capVal = document.getElementById("f-photo-caption").value.trim();
+        if (pendingPhoto) {
+            PhotoDB.save(editingId, pendingPhoto.dataUrl, capVal);
+            updated.hasPhoto = true;
+        } else if (pendingPhotoCleared) {
+            PhotoDB.delete(editingId);
+            delete updated.hasPhoto;
+        } else if (updated.hasPhoto && capVal !== undefined) {
+            // фото не меняли, но могли поправить подпись
+            PhotoDB.get(editingId).then(rec => {
+                if (rec) PhotoDB.save(editingId, rec.dataUrl, capVal);
+            });
+        }
+
+        state.records[idx] = updated;
+        saveToStorage();
+        closeModal("modal-add");
+        renderFilters();
+        if (state.mode === "book") renderBook();
+        else renderFeed();
+        editingId = null;
+        toast("Запись обновлена");
+        return;
+    }
+    
+    // === СОЗДАНИЕ НОВОЙ — сначала ищем похожие ===
+    const candidate = {
+        id: "u_" + Date.now().toString(36),
+        type: priority,
+        priority,
+        category,
+        subcategory,
+        title,
+        content,
+        tags,
+        links,
+        source,
+        sourceDate: today,
+        createdAt: today,
+        status: "active"
+    };
+    if (pendingPhoto) candidate.hasPhoto = true;
+    
+    const similar = findSimilar(candidate);
+    
+    if (similar.length > 0) {
+        // Показываем модалку конфликта
+        pendingNewRecord = candidate;
+        showConflictModal(similar);
+    } else {
+        // Похожих нет — сохраняем сразу
+        commitNewRecord(candidate);
+    }
+}
+
+function commitNewRecord(record, replacesIds = []) {
+    if (replacesIds.length > 0) {
+        record.replaces = replacesIds;
+        // Помечаем замещаемые как устаревшие
+        replacesIds.forEach(oldId => {
+            const idx = state.records.findIndex(r => r.id === oldId);
+            if (idx !== -1) {
+                state.records[idx] = {
+                    ...state.records[idx],
+                    status: "superseded",
+                    replacedBy: record.id,
+                    updatedAt: new Date().toISOString().slice(0, 10)
+                };
+            }
+        });
+    }
+    
+    state.records.unshift(record);
+    // Фото новой записи → в базу
+    if (record.hasPhoto && pendingPhoto) {
+        const capVal = document.getElementById("f-photo-caption").value.trim();
+        PhotoDB.save(record.id, pendingPhoto.dataUrl, capVal);
+    }
+    saveToStorage();
+    closeModal("modal-add");
+    closeModal("modal-conflict");
+    pendingNewRecord = null;
+    pendingPhoto = null;
+    pendingPhotoCleared = false;
+    renderFilters();
+    if (state.mode === "book") renderBook();
+    else renderFeed();
+    
+    if (replacesIds.length > 0) {
+        toast(`Запись добавлена, ${replacesIds.length} устарев${replacesIds.length === 1 ? "шая" : "шие"} помечена(ы)`);
+    } else {
+        toast("Запись добавлена");
+    }
+}
+
+// === ПОИСК ПОХОЖИХ ===
+function findSimilar(candidate) {
+    const candidateTagStems = new Set(
+        (candidate.tags || []).map(t => stem(t.toLowerCase()))
+    );
+    const candidateTitleStems = new Set(stemmedTokens(candidate.title));
+    
+    const similar = [];
+    
+    state.records.forEach(r => {
+        // Только из той же категории
+        if (r.category !== candidate.category) return;
+        // Устаревшие не учитываем как конфликт
+        if (r.status === "superseded") return;
+        
+        let score = 0;
+        let reason = [];
+        
+        // Совпадение тегов
+        const rTagStems = (r.tags || []).map(t => stem(t.toLowerCase()));
+        let tagMatch = 0;
+        rTagStems.forEach(ts => {
+            if (candidateTagStems.has(ts)) tagMatch++;
+        });
+        if (tagMatch >= 2) {
+            score += tagMatch * 2;
+            reason.push(`${tagMatch} общих тегов`);
+        } else if (tagMatch === 1 && candidateTagStems.size <= 2) {
+            // Если у новой записи мало тегов — 1 совпадения тоже важно
+            score += 1;
+        }
+        
+        // Совпадение стемов заголовка
+        const rTitleStems = stemmedTokens(r.title);
+        let titleMatch = 0;
+        rTitleStems.forEach(ts => {
+            if (ts.length >= 3 && candidateTitleStems.has(ts)) titleMatch++;
+        });
+        if (titleMatch >= 2) {
+            score += titleMatch * 3;
+            reason.push(`похожий заголовок`);
+        }
+        
+        if (score >= 3) {
+            similar.push({ record: r, score, reason });
+        }
+    });
+    
+    // Сортируем по убыванию релевантности
+    similar.sort((a, b) => b.score - a.score);
+    
+    // Не больше 5 — иначе глаза разбегутся
+    return similar.slice(0, 5);
+}
+
+function showConflictModal(similar) {
+    const list = document.getElementById("conflict-list");
+    list.innerHTML = similar.map(({ record: r }) => {
+        const priority = r.priority || r.type || "норма";
+        return `
+            <div class="conflict-item" data-conflict-id="${escapeHtml(r.id)}">
+                <div class="conflict-item-meta">${escapeHtml(priority)}${r.subcategory ? " · " + escapeHtml(r.subcategory) : ""}</div>
+                <div class="conflict-item-title">${escapeHtml(r.title)}</div>
+                <div class="conflict-item-body">${escapeHtml(r.content)}</div>
+            </div>
+        `;
+    }).join("");
+    
+    // Клики по похожим записям — помечают замещаемой
+    list.querySelectorAll("[data-conflict-id]").forEach(el => {
+        el.onclick = () => {
+            if (!pendingNewRecord) return;
+            commitNewRecord(pendingNewRecord, [el.dataset.conflictId]);
+        };
+    });
+    
+    document.getElementById("modal-conflict").classList.add("visible");
+}
+
+// === ПОИСК КОНФЛИКТОВ ПО ВСЕМУ КОРПУСУ ===
+function findAllConflicts() {
+    // Берём только активные записи
+    const active = state.records.filter(r => r.status !== "superseded");
+    
+    // Группируем по категориям
+    const byCategory = {};
+    active.forEach(r => {
+        if (!byCategory[r.category]) byCategory[r.category] = [];
+        byCategory[r.category].push(r);
+    });
+    
+    const groups = [];
+    
+    Object.keys(byCategory).forEach(cat => {
+        const items = byCategory[cat];
+        if (items.length < 2) return;
+        
+        // Предвычислим стемы тегов и заголовков для каждой записи
+        const prepared = items.map(r => ({
+            record: r,
+            tagStems: new Set((r.tags || []).map(t => stem(t.toLowerCase()))),
+            titleStems: new Set(stemmedTokens(r.title))
+        }));
+        
+        // Union-Find — собираем кластеры похожих записей
+        const parent = new Array(prepared.length).fill(0).map((_, i) => i);
+        function find(i) { return parent[i] === i ? i : (parent[i] = find(parent[i])); }
+        function union(a, b) { parent[find(a)] = find(b); }
+        
+        for (let i = 0; i < prepared.length; i++) {
+            for (let j = i + 1; j < prepared.length; j++) {
+                const a = prepared[i], b = prepared[j];
+                
+                // Сколько общих тегов
+                let tagMatch = 0;
+                a.tagStems.forEach(t => { if (b.tagStems.has(t)) tagMatch++; });
+                
+                // Сколько общих стемов заголовка (длиной от 3)
+                let titleMatch = 0;
+                a.titleStems.forEach(t => {
+                    if (t.length >= 3 && b.titleStems.has(t)) titleMatch++;
+                });
+                
+                // Конфликт: 2+ общих тегов И 2+ общих стема заголовка
+                if (tagMatch >= 2 && titleMatch >= 2) {
+                    union(i, j);
+                }
+            }
+        }
+        
+        // Собираем кластеры
+        const clusters = {};
+        prepared.forEach((p, i) => {
+            const root = find(i);
+            if (!clusters[root]) clusters[root] = [];
+            clusters[root].push(p.record);
+        });
+        
+        Object.values(clusters).forEach(cluster => {
+            if (cluster.length >= 2) {
+                groups.push({ category: cat, items: cluster });
+            }
+        });
+    });
+    
+    // Сортируем: сначала самые крупные группы
+    groups.sort((a, b) => b.items.length - a.items.length);
+    return groups;
+}
+
+function openConflictsSearch() {
+    closeModal("modal-menu");
+    renderConflictsSearch();
+    document.getElementById("modal-conflicts").classList.add("visible");
+}
+
+function renderConflictsSearch() {
+    const groups = findAllConflicts();
+    const content = document.getElementById("conflicts-content");
+    
+    if (groups.length === 0) {
+        content.innerHTML = `<div class="conflicts-empty">Потенциальных конфликтов не найдено.<br>В базе нет групп записей с похожими тегами и заголовками внутри одной категории.</div>`;
+        return;
+    }
+    
+    let html = `<p class="conflict-intro" style="margin-bottom: 18px;">Найдено групп: <strong>${groups.length}</strong>. Кликните на запись, чтобы открыть её.</p>`;
+    
+    groups.forEach(g => {
+        html += `
+            <div class="conflicts-group">
+                <div class="conflicts-group-meta">${escapeHtml(g.category)} · ${g.items.length} записей</div>
+                <div class="conflict-list" style="max-height: none;">
+        `;
+        g.items.forEach(r => {
+            const priority = r.priority || r.type || "норма";
+            html += `
+                <div class="conflict-item" data-conflict-open="${escapeHtml(r.id)}">
+                    <div class="conflict-item-meta">${escapeHtml(priority)}${r.subcategory ? " · " + escapeHtml(r.subcategory) : ""}</div>
+                    <div class="conflict-item-title">${escapeHtml(r.title)}</div>
+                    <div class="conflict-item-body">${escapeHtml(r.content)}</div>
+                </div>
+            `;
+        });
+        html += `</div></div>`;
+    });
+    
+    content.innerHTML = html;
+    
+    // Клик по записи — открыть просмотр
+    content.querySelectorAll("[data-conflict-open]").forEach(el => {
+        el.onclick = () => {
+            const id = el.dataset.conflictOpen;
+            closeModal("modal-conflicts");
+            openRecord(id);
+        };
+    });
+}
+
+// === ЭКСПОРТ JSON ===
+function exportJSON() {
+    const blob = new Blob([JSON.stringify(state.records, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mb_corpus_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("JSON скачан");
+}
+
+// === ЭКСПОРТ В WORD (docx) ===
+// Простой генератор docx через WordprocessingML внутри ZIP
+function exportDOCX() {
+    // Группируем по категориям
+    const byCategory = {};
+    state.records.forEach(r => {
+        if (!byCategory[r.category]) byCategory[r.category] = [];
+        byCategory[r.category].push(r);
+    });
+    
+    // Создаём очень простой docx через ZIP-структуру
+    // Минимальный docx = [Content_Types].xml + _rels/.rels + word/document.xml
+    
+    const xmlEscape = (s) => String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    
+    let docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>
+<w:p><w:pPr><w:pStyle w:val="Title"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="48"/></w:rPr><w:t>МБ База Знаний</w:t></w:r></w:p>
+<w:p><w:r><w:rPr><w:i/><w:sz w:val="24"/></w:rPr><w:t>Свод норм мебельного производства · ${new Date().toLocaleDateString("ru-RU")}</w:t></w:r></w:p>
+<w:p><w:r><w:t></w:t></w:r></w:p>
+`;
+    
+    const catOrder = Object.keys(byCategory).sort((a, b) => byCategory[b].length - byCategory[a].length);
+    
+    catOrder.forEach(cat => {
+        docXml += `<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="36"/></w:rPr><w:t>${xmlEscape(cat.toUpperCase())}</w:t></w:r></w:p>`;
+        
+        // Группируем по подкатегории
+        const bySub = {};
+        byCategory[cat].forEach(r => {
+            const sub = r.subcategory || "";
+            if (!bySub[sub]) bySub[sub] = [];
+            bySub[sub].push(r);
+        });
+        
+        Object.keys(bySub).forEach(sub => {
+            if (sub) {
+                docXml += `<w:p><w:pPr><w:pStyle w:val="Heading2"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>${xmlEscape(sub)}</w:t></w:r></w:p>`;
+            }
+            bySub[sub].forEach(r => {
+                const p = r.priority || r.type || "";
+                docXml += `<w:p><w:r><w:rPr><w:b/><w:sz w:val="24"/></w:rPr><w:t>${xmlEscape(r.title)}</w:t></w:r></w:p>`;
+                docXml += `<w:p><w:r><w:rPr><w:i/><w:sz w:val="18"/><w:color w:val="888888"/></w:rPr><w:t>${xmlEscape(p)}${r.tags && r.tags.length ? " · " + xmlEscape(r.tags.join(", ")) : ""}</w:t></w:r></w:p>`;
+                docXml += `<w:p><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t>${xmlEscape(r.content)}</w:t></w:r></w:p>`;
+                docXml += `<w:p><w:r><w:t></w:t></w:r></w:p>`;
+            });
+        });
+    });
+    
+    docXml += `</w:body></w:document>`;
+    
+    const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+    
+    const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+    
+    // Создаём ZIP вручную (очень простой, без сжатия — STORED)
+    const zip = createZip([
+        { name: "[Content_Types].xml", content: contentTypes },
+        { name: "_rels/.rels", content: rels },
+        { name: "word/document.xml", content: docXml }
+    ]);
+    
+    const blob = new Blob([zip], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `МБ_База_Знаний_${new Date().toISOString().slice(0, 10)}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("Word-документ скачан");
+}
+
+// === ПРОСТОЙ ZIP-АРХИВАТОР (без сжатия, STORED) ===
+function createZip(files) {
+    const encoder = new TextEncoder();
+    const fileData = files.map(f => ({
+        name: f.name,
+        nameBytes: encoder.encode(f.name),
+        content: encoder.encode(f.content)
+    }));
+    
+    // Считаем CRC32 для каждого файла
+    fileData.forEach(f => {
+        f.crc = crc32(f.content);
+        f.size = f.content.length;
+    });
+    
+    const localHeaders = [];
+    const centralDir = [];
+    let offset = 0;
+    
+    fileData.forEach(f => {
+        // Local File Header
+        const lh = new Uint8Array(30 + f.nameBytes.length);
+        const lhDV = new DataView(lh.buffer);
+        lhDV.setUint32(0, 0x04034b50, true);  // signature
+        lhDV.setUint16(4, 20, true);            // version
+        lhDV.setUint16(6, 0, true);             // flags
+        lhDV.setUint16(8, 0, true);             // method (STORED)
+        lhDV.setUint16(10, 0, true);            // mod time
+        lhDV.setUint16(12, 0, true);            // mod date
+        lhDV.setUint32(14, f.crc, true);        // crc32
+        lhDV.setUint32(18, f.size, true);       // compressed size
+        lhDV.setUint32(22, f.size, true);       // uncompressed size
+        lhDV.setUint16(26, f.nameBytes.length, true); // name length
+        lhDV.setUint16(28, 0, true);            // extra length
+        lh.set(f.nameBytes, 30);
+        
+        f.offset = offset;
+        const combined = new Uint8Array(lh.length + f.content.length);
+        combined.set(lh, 0);
+        combined.set(f.content, lh.length);
+        localHeaders.push(combined);
+        offset += combined.length;
+    });
+    
+    // Central Directory
+    fileData.forEach(f => {
+        const cd = new Uint8Array(46 + f.nameBytes.length);
+        const cdDV = new DataView(cd.buffer);
+        cdDV.setUint32(0, 0x02014b50, true);   // signature
+        cdDV.setUint16(4, 20, true);            // version made by
+        cdDV.setUint16(6, 20, true);            // version needed
+        cdDV.setUint16(8, 0, true);             // flags
+        cdDV.setUint16(10, 0, true);            // method
+        cdDV.setUint16(12, 0, true);            // mod time
+        cdDV.setUint16(14, 0, true);            // mod date
+        cdDV.setUint32(16, f.crc, true);        // crc32
+        cdDV.setUint32(20, f.size, true);       // compressed
+        cdDV.setUint32(24, f.size, true);       // uncompressed
+        cdDV.setUint16(28, f.nameBytes.length, true); // name length
+        cdDV.setUint16(30, 0, true);            // extra
+        cdDV.setUint16(32, 0, true);            // comment
+        cdDV.setUint16(34, 0, true);            // disk
+        cdDV.setUint16(36, 0, true);            // int attr
+        cdDV.setUint32(38, 0, true);            // ext attr
+        cdDV.setUint32(42, f.offset, true);     // local header offset
+        cd.set(f.nameBytes, 46);
+        centralDir.push(cd);
+    });
+    
+    const cdSize = centralDir.reduce((a, b) => a + b.length, 0);
+    const cdOffset = offset;
+    
+    // End of Central Directory
+    const eocd = new Uint8Array(22);
+    const eocdDV = new DataView(eocd.buffer);
+    eocdDV.setUint32(0, 0x06054b50, true);
+    eocdDV.setUint16(4, 0, true);
+    eocdDV.setUint16(6, 0, true);
+    eocdDV.setUint16(8, fileData.length, true);
+    eocdDV.setUint16(10, fileData.length, true);
+    eocdDV.setUint32(12, cdSize, true);
+    eocdDV.setUint32(16, cdOffset, true);
+    eocdDV.setUint16(20, 0, true);
+    
+    // Склеиваем
+    const totalSize = offset + cdSize + 22;
+    const result = new Uint8Array(totalSize);
+    let pos = 0;
+    localHeaders.forEach(h => { result.set(h, pos); pos += h.length; });
+    centralDir.forEach(c => { result.set(c, pos); pos += c.length; });
+    result.set(eocd, pos);
+    
+    return result;
+}
+
+// CRC32 для ZIP
+const CRC_TABLE = (() => {
+    const table = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+        let c = i;
+        for (let k = 0; k < 8; k++) {
+            c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+        }
+        table[i] = c;
+    }
+    return table;
+})();
+
+function crc32(data) {
+    let crc = 0xFFFFFFFF;
+    for (let i = 0; i < data.length; i++) {
+        crc = CRC_TABLE[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+// === ИМПОРТ ===
+function importFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!Array.isArray(data)) {
+                toast("Неверный формат файла");
+                return;
+            }
+            if (confirm(`Импортировать ${data.length} записей? Текущие записи будут заменены.`)) {
+                state.records = data;
+                saveToStorage();
+                renderFilters();
+                renderFeed();
+                toast(`Импортировано: ${data.length} записей`);
+                closeModal("modal-menu");
+            }
+        } catch (err) {
+            toast("Ошибка чтения файла");
+        }
+    };
+    reader.readAsText(file);
+}
+
+async function reloadCorpus() {
+    if (!confirm("Перезагрузить стартовый корпус? Текущие записи будут заменены.")) return;
+    const data = await loadCorpus();
+    if (data) {
+        state.records = data;
+        saveToStorage();
+        renderFilters();
+        renderFeed();
+        toast(`Корпус перезагружен: ${data.length} записей`);
+        closeModal("modal-menu");
+    } else {
+        toast("Не удалось загрузить корпус");
+    }
+}
+
+function clearAll() {
+    if (!confirm("Удалить ВСЕ записи без возможности восстановления?")) return;
+    if (!confirm("Точно? Это действие нельзя отменить!")) return;
+    state.records = [];
+    saveToStorage();
+    renderFilters();
+    renderFeed();
+    toast("Все записи удалены");
+    closeModal("modal-menu");
+}
+
+// === ТОСТЫ ===
+let toastTimer;
+function toast(msg) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("visible");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("visible"), 2500);
+}
+
+// === ТЕМА ===
+const THEME_KEY = "mb_theme";
+
+function loadTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "dark") {
+        document.documentElement.classList.add("dark");
+        updateThemeMeta(true);
+    } else if (saved === "light") {
+        document.documentElement.classList.remove("dark");
+        updateThemeMeta(false);
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
+        updateThemeMeta(true);
+    }
+}
+
+function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+    updateThemeMeta(isDark);
+}
+
+function updateThemeMeta(isDark) {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", isDark ? "#1A1A1D" : "#FAF9F5");
+}
+
+// === РЕЖИМ "КНИГА" ===
+
+// Логический порядок глав (как в исходном регламенте «Состав документации»)
+const BOOK_CHAPTER_ORDER = [
+    "документация",
+    "самопроверка",
+    "чертежи",
+    "конструктив",
+    "присадка",
+    "фурнитура",
+    "встроенная-техника",
+    "процессы",
+    "разное"
+];
+
+// Человекочитаемые названия глав
+const CHAPTER_TITLES = {
+    "документация": "Состав документации",
+    "самопроверка": "Лист самопроверки",
+    "чертежи": "Чертежи: оформление и правила",
+    "конструктив": "Конструктив",
+    "присадка": "Присадка",
+    "фурнитура": "Фурнитура",
+    "встроенная-техника": "Встроенная техника",
+    "процессы": "Процессы и коммуникация",
+    "разное": "Разное"
+};
+
+// Описание главы (для оглавления и шапки главы)
+const CHAPTER_INTROS = {
+    "документация": "Какие документы выпускает КБ и как они оформляются.",
+    "самопроверка": "Чек-лист перед передачей чертежей.",
+    "чертежи": "Размеры, виды, спецификации, что указываем и не указываем.",
+    "конструктив": "Материалы, толщины, узлы, опоры — основа изделия.",
+    "присадка": "Параметры станка, размещение присадки в документации.",
+    "фурнитура": "Петли, направляющие, навесы, профили, подъёмники.",
+    "встроенная-техника": "Ниши, привязки, монтаж техники.",
+    "процессы": "Документация, коммуникация с цехом, инфраструктура.",
+    "разное": "Прочее, не вошедшее в основные главы."
+};
+
+// Порядок приоритетов внутри подраздела (стандарты сверху, обсуждаемое снизу)
+const PRIORITY_IN_BOOK = {
+    "стандарт": 0,
+    "норма": 1,
+    "рекомендация": 2,
+    "решение": 3,
+    "антипример": 4,
+    "задача": 5,
+    "обсуждается": 6
+};
+
+function bookEntries() {
+    // Группируем все АКТИВНЫЕ записи по категориям → подкатегориям
+    const byChapter = {};
+    state.records.forEach(r => {
+        if (r.status === "superseded") return; // в книге устаревших нет
+        const cat = r.category || "разное";
+        if (!byChapter[cat]) byChapter[cat] = {};
+        const sub = r.subcategory || "";
+        if (!byChapter[cat][sub]) byChapter[cat][sub] = [];
+        byChapter[cat][sub].push(r);
+    });
+    
+    // Сортируем записи внутри подраздела по приоритету
+    Object.keys(byChapter).forEach(cat => {
+        Object.keys(byChapter[cat]).forEach(sub => {
+            byChapter[cat][sub].sort((a, b) => {
+                const pa = PRIORITY_IN_BOOK[a.priority || a.type] ?? 99;
+                const pb = PRIORITY_IN_BOOK[b.priority || b.type] ?? 99;
+                return pa - pb;
+            });
+        });
+    });
+    
+    return byChapter;
+}
+
+function chapterOrder() {
+    // Берём канонический порядок + добавляем те категории что не учли (на случай новых)
+    const data = bookEntries();
+    const inData = Object.keys(data);
+    const ordered = BOOK_CHAPTER_ORDER.filter(c => inData.includes(c));
+    const extra = inData.filter(c => !BOOK_CHAPTER_ORDER.includes(c)).sort();
+    return [...ordered, ...extra];
+}
+
+function chapterTitle(cat) {
+    return CHAPTER_TITLES[cat] || (cat.charAt(0).toUpperCase() + cat.slice(1));
+}
+
+function chapterIntro(cat) {
+    return CHAPTER_INTROS[cat] || "";
+}
+
+function countInChapter(byChapter, cat) {
+    let n = 0;
+    Object.values(byChapter[cat] || {}).forEach(arr => n += arr.length);
+    return n;
+}
+
+function romanNumeral(n) {
+    const map = [
+        [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]
+    ];
+    let result = "";
+    for (const [v, s] of map) {
+        while (n >= v) { result += s; n -= v; }
+    }
+    return result;
+}
+
+function chapterId(cat) {
+    return "chap-" + cat.replace(/[^a-zа-я0-9-]/gi, "");
+}
+
+function renderBook() {
+    const book = document.getElementById("book");
+    if (state.records.length === 0) {
+        book.innerHTML = `<div class="empty"><div class="empty-title">Корпус пуст</div><div>Добавьте записи в режиме «Лента» или импортируйте JSON</div></div>`;
+        return;
+    }
+    
+    const data = bookEntries();
+    const chapters = chapterOrder();
+    const total = state.records.length;
+    const today = new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+    
+    // Обложка
+    let html = `
+        <header class="book-cover">
+            <h1 class="book-cover-title">МБ База Знаний</h1>
+            <div class="book-cover-sub">свод норм мебельного производства «Массивбург»</div>
+            <div class="book-cover-meta">${total} записей · обновлено ${escapeHtml(today)}</div>
+        </header>
+    `;
+    
+    // Оглавление
+    html += `<nav class="book-toc"><div class="book-toc-title">Содержание</div><div class="book-toc-list">`;
+    chapters.forEach((cat, idx) => {
+        const count = countInChapter(data, cat);
+        html += `
+            <a class="book-toc-item" data-jump="${escapeHtml(chapterId(cat))}">
+                <span class="book-toc-num">${romanNumeral(idx + 1)}</span>
+                <span class="book-toc-name">${escapeHtml(chapterTitle(cat))}</span>
+                <span class="book-toc-count">${count}</span>
+            </a>
+        `;
+    });
+    html += `</div></nav>`;
+    
+    // Главы
+    chapters.forEach((cat, idx) => {
+        const intro = chapterIntro(cat);
+        const subs = data[cat] || {};
+        const subKeys = Object.keys(subs).sort((a, b) => {
+            // Пустая подкатегория идёт первой
+            if (!a) return -1;
+            if (!b) return 1;
+            return a.localeCompare(b, "ru");
+        });
+        
+        html += `
+            <article class="book-chapter" id="${escapeHtml(chapterId(cat))}">
+                <div class="book-chapter-num">Глава ${romanNumeral(idx + 1)}</div>
+                <h2 class="book-chapter-title">${escapeHtml(chapterTitle(cat))}</h2>
+        `;
+        
+        if (intro) {
+            html += `<p class="book-entry-body" style="color: var(--t2); margin-bottom: 28px; font-style: italic;">${escapeHtml(intro)}</p>`;
+        }
+        
+        subKeys.forEach(sub => {
+            if (sub) {
+                html += `<h3 class="book-section-title">${escapeHtml(sub)}</h3>`;
+            }
+            subs[sub].forEach(r => {
+                const priority = r.priority || r.type || "норма";
+                // Кликабельные ссылки внутри текста
+                let body = escapeHtml(r.content).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+                
+                const isQuiet = (priority === "стандарт" || priority === "норма");
+                html += `
+                    <div class="book-entry" data-priority="${escapeHtml(priority)}" data-id="${escapeHtml(r.id)}">
+                        ${isQuiet ? "" : `<div class="book-entry-head"><span class="book-entry-mark">${escapeHtml(priority)}</span></div>`}
+                        <button class="book-entry-edit book-entry-edit-floating" data-edit-id="${escapeHtml(r.id)}" title="Редактировать" aria-label="Редактировать">
+                            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        </button>
+                        <h4 class="book-entry-title">${escapeHtml(r.title)}</h4>
+                        ${r.hasPhoto ? `<div class="entry-photo" data-book-photo="${r.id}"><div class="entry-photo-loading">Загрузка фото…</div></div>` : ""}
+                        <div class="book-entry-body">${body}</div>
+                    </div>
+                `;
+            });
+        });
+        
+        html += `</article>`;
+    });
+    
+    book.innerHTML = html;
+    
+    // Привязываем клики оглавления
+    book.querySelectorAll("[data-jump]").forEach(el => {
+        el.addEventListener("click", (e) => {
+            e.preventDefault();
+            const target = document.getElementById(el.dataset.jump);
+            if (target) {
+                target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        });
+    });
+    
+    // Клики по кнопке редактирования внутри записи
+    book.querySelectorAll("[data-edit-id]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const r = state.records.find(x => x.id === btn.dataset.editId);
+            if (r) openAddModal(r);
+        });
+    });
+    
+    // Клик по самой записи открывает просмотр
+    book.querySelectorAll(".book-entry[data-id]").forEach(entry => {
+        entry.addEventListener("click", (e) => {
+            // Ссылки внутри текста и фото не открывают модалку записи
+            if (e.target.tagName === "A") return;
+            if (e.target.closest(".entry-photo")) return;
+            openRecord(entry.dataset.id);
+        });
+    });
+
+    // Lazy-загрузка фото в книге
+    book.querySelectorAll("[data-book-photo]").forEach(box => {
+        const id = box.dataset.bookPhoto;
+        PhotoDB.get(id).then(rec => {
+            if (rec && rec.dataUrl) {
+                box.innerHTML = `<img src="${rec.dataUrl}" alt="${escapeHtml(rec.caption || "")}">` +
+                    (rec.caption ? `<div class="entry-photo-caption">${escapeHtml(rec.caption)}</div>` : "");
+                box.onclick = (e) => { e.stopPropagation(); openLightbox(rec.dataUrl, rec.caption); };
+            } else {
+                box.remove();
+            }
+        });
+    });
+}
+
+function setMode(mode) {
+    if (mode !== "feed" && mode !== "book") return;
+    state.mode = mode;
+    
+    const feed = document.getElementById("feed");
+    const book = document.getElementById("book");
+    const storiesBar = document.getElementById("stories-bar");
+    const filters = document.getElementById("filters");
+    const stats = document.getElementById("stats");
+    const search = document.querySelector(".search-wrap");
+    const fab = document.getElementById("btn-add");
+    const btnTop = document.getElementById("btn-top");
+    
+    document.querySelectorAll(".mode-btn").forEach(b => {
+        const isActive = b.dataset.mode === mode;
+        b.classList.toggle("active", isActive);
+        b.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+
+    // Прячем всё, потом показываем нужное
+    feed.style.display = "none";
+    book.hidden = true;
+    filters.style.display = "none";
+    stats.style.display = "none";
+    search.style.display = "none";
+    fab.style.display = "none";
+    if (storiesBar) storiesBar.hidden = true;
+    if (btnTop) btnTop.classList.remove("visible");
+    
+    if (mode === "book") {
+        book.hidden = false;
+        renderBook();
+        window.scrollTo({ top: 0, behavior: "auto" });
+    } else {
+        feed.style.display = "";
+        filters.style.display = "";
+        stats.style.display = "";
+        search.style.display = "";
+        fab.style.display = "";
+        renderStoriesBar(); // лента кружков видна только в Ленте
+    }
+    
+    localStorage.setItem("mb_mode", mode);
+}
+
+function loadMode() {
+    const saved = localStorage.getItem("mb_mode");
+    if (saved === "book") setMode("book");
+}
+
+// ========================================================
+// СТОРИС — реестр модулей и движок-проигрыватель
+// (по спецификации stories-design.md)
+// ========================================================
+
+// === РЕЕСТР СТОРИС (манифест) ===
+// Список сторис лежит в файле stories/index.json рядом с index.html.
+// Чтобы добавить сторис: положи stories/<имя>.json и впиши строку в
+// stories/index.json — код менять не нужно, index подхватит сам.
+//
+// Формат stories/index.json:
+//   [ { "id": "zerkalo", "file": "stories/zerkalo.json",
+//       "title": "Работа с зеркалом", "sub": "4 шага", "icon": "З" } ]
+let STORIES = [];
+const STORIES_MANIFEST = "stories/index.json";
+
+async function loadStoriesManifest() {
+    try {
+        const resp = await fetch(STORIES_MANIFEST, { cache: "no-cache" });
+        if (!resp.ok) { STORIES = []; return; }
+        const data = await resp.json();
+        STORIES = Array.isArray(data) ? data : (data.stories || []);
+    } catch (e) {
+        STORIES = []; // манифеста нет — просто нет сторис, не ошибка
+    }
+}
+
+const STORIES_SEEN_KEY = "mb_stories_seen";
+
+function getSeenStories() {
+    try { return JSON.parse(localStorage.getItem(STORIES_SEEN_KEY)) || []; }
+    catch { return []; }
+}
+function markStorySeen(id) {
+    const seen = getSeenStories();
+    if (!seen.includes(id)) { seen.push(id); localStorage.setItem(STORIES_SEEN_KEY, JSON.stringify(seen)); }
+}
+function isStorySeen(id) { return getSeenStories().includes(id); }
+
+// Первая буква заголовка для кружка без фото
+function storyInitial(s) {
+    if (s.icon) return escapeHtml(s.icon);
+    const t = (s.title || s.id || "?").trim();
+    return escapeHtml(t.charAt(0).toUpperCase());
+}
+
+// Лента кружков над фидом
+function renderStoriesBar() {
+    const bar = document.getElementById("stories-bar");
+    if (!bar) return;
+
+    if (STORIES.length === 0) { bar.hidden = true; bar.innerHTML = ""; return; }
+    bar.hidden = false;
+
+    // Кружки: непросмотренные сначала, затем просмотренные
+    const sorted = [...STORIES].sort((a, b) => isStorySeen(a.id) - isStorySeen(b.id));
+    const unseenCount = STORIES.filter(s => !isStorySeen(s.id)).length;
+
+    let html = sorted.map(s => {
+        const seen = isStorySeen(s.id);
+        return `
+            <button class="story-bubble${seen ? " seen" : ""}" data-story-id="${escapeHtml(s.id)}">
+                <span class="story-bubble-ring">
+                    <span class="story-bubble-inner" data-story-cover="${escapeHtml(s.id)}">${storyInitial(s)}</span>
+                </span>
+                <span class="story-bubble-label">${escapeHtml(s.title || s.id)}</span>
+            </button>`;
+    }).join("");
+
+    // Кружок «Смотреть все» — если есть непросмотренные и сторис больше одной
+    if (unseenCount > 1) {
+        html = `
+            <button class="story-bubble watch-all" id="bubble-watch-all">
+                <span class="story-bubble-ring">
+                    <span class="story-bubble-inner">
+                        <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+                    </span>
+                </span>
+                <span class="story-bubble-label">Смотреть все</span>
+            </button>` + html;
+    }
+
+    bar.innerHTML = html;
+
+    bar.querySelectorAll("[data-story-id]").forEach(b => {
+        b.onclick = () => playStory(b.dataset.storyId);
+    });
+    const wa = document.getElementById("bubble-watch-all");
+    if (wa) wa.onclick = watchAllStories;
+
+    // Обложки-картинки: если у первого слайда сторис есть фото — показать в кружке
+    bar.querySelectorAll("[data-story-cover]").forEach(inner => {
+        const entry = STORIES.find(s => s.id === inner.dataset.storyCover);
+        if (entry && entry.cover_photo_ref) {
+            PhotoDB.get(entry.cover_photo_ref).then(rec => {
+                if (rec && rec.dataUrl) inner.innerHTML = `<img src="${rec.dataUrl}" alt="">`;
+            });
+        }
+    });
+}
+
+// === ЗАГРУЗКА И СБОРКА СТОРИС ===
+// Кэш загруженных файлов сторис
+const storiesCache = {};
+
+async function loadStoryFile(entry) {
+    if (storiesCache[entry.id]) return storiesCache[entry.id];
+    try {
+        const resp = await fetch(entry.file);
+        if (!resp.ok) throw new Error("not found");
+        const data = await resp.json();
+        storiesCache[entry.id] = data;
+        return data;
+    } catch (e) {
+        toast("Не удалось загрузить сторис");
+        return null;
+    }
+}
+
+// Собираем слайды: ссылка на id корпуса тянет запись, плюс свои поля
+function buildSlides(story) {
+    const slides = [];
+    // Обложка
+    if (story.cover) {
+        slides.push({ kind: "cover", tag: story.cover.tag, title: story.cover.title, sub: story.cover.sub, brand: story.cover.brand });
+    }
+    // Контент-слайды
+    const items = story.slides || [];
+    items.forEach((sl, i) => {
+        let rec = null;
+        if (sl.ref) rec = state.records.find(r => r.id === sl.ref);
+        slides.push({
+            kind: "content",
+            tag: sl.tag || (rec ? `${rec.category}${rec.subcategory ? " · " + rec.subcategory : ""}` : ""),
+            title: sl.title || (rec ? rec.title : ""),
+            sub: sl.sub || (rec ? (rec.priority || rec.type || "") : ""),
+            body: sl.body || (rec ? rec.content : ""),
+            insight: sl.note || sl.insight || "",
+            insightKind: rec ? (rec.priority || rec.type) : "",
+            photoId: (rec && rec.hasPhoto) ? rec.id : null,
+            position: `${i + 1} из ${items.length}`
+        });
+    });
+    // Финал
+    if (story.final) {
+        slides.push({ kind: "final", title: story.final.title, sub: story.final.sub });
+    }
+    return slides;
+}
+
+// === ПРОИГРЫВАТЕЛЬ ===
+let playerState = { slides: [], cur: 0, queue: [], queueIdx: 0, currentStoryId: null };
+
+async function playStory(storyId, queue = null) {
+    const entry = STORIES.find(s => s.id === storyId);
+    if (!entry) return;
+    const story = await loadStoryFile(entry);
+    if (!story) return;
+
+    playerState.slides = buildSlides(story);
+    playerState.cur = 0;
+    playerState.currentStoryId = storyId;
+    if (queue) { playerState.queue = queue; }
+    else { playerState.queue = null; }
+
+    document.getElementById("player").classList.add("visible");
+    renderPlayerSlides();
+    updatePlayer();
+}
+
+function renderPlayerSlides() {
+    const track = document.getElementById("player-track");
+    track.innerHTML = playerState.slides.map(s => {
+        if (s.kind === "cover") {
+            return `<div class="player-slide cover">
+                ${s.brand ? `<div class="ps-cover-brand">${escapeHtml(s.brand)}</div>` : `<div class="ps-cover-brand">ТехЧекПро</div>`}
+                ${s.tag ? `<div class="ps-tag">${escapeHtml(s.tag)}</div>` : ""}
+                <div class="ps-title">${escapeHtml(s.title || "")}</div>
+                ${s.sub ? `<div class="ps-sub">${escapeHtml(s.sub)}</div>` : ""}
+            </div>`;
+        }
+        if (s.kind === "final") {
+            return `<div class="player-slide final">
+                <div class="ps-title">${escapeHtml(s.title || "Конец")}</div>
+                ${s.sub ? `<div class="ps-final-note">${escapeHtml(s.sub)}</div>` : ""}
+            </div>`;
+        }
+        // content
+        let bodyHtml = escapeHtml(s.body || "").replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--acc)">$1</a>');
+        return `<div class="player-slide content">
+            ${s.tag ? `<div class="ps-tag">${escapeHtml(s.tag)} · ${escapeHtml(s.position)}</div>` : ""}
+            <div class="ps-title">${escapeHtml(s.title || "")}</div>
+            ${s.sub ? `<div class="ps-sub">${escapeHtml(s.sub)}</div>` : ""}
+            ${s.photoId ? `<div class="ps-photo" data-ps-photo="${s.photoId}"></div>` : ""}
+            <div class="ps-card">
+                <div class="ps-body">${bodyHtml}</div>
+                ${s.insight ? `<div class="ps-insight" data-kind="${escapeHtml(s.insightKind || "")}">
+                    <span class="ps-insight-ic">▸</span><span>${escapeHtml(s.insight)}</span>
+                </div>` : ""}
+            </div>
+        </div>`;
+    }).join("");
+
+    // Прогресс-бар
+    const prog = document.getElementById("player-progress");
+    prog.innerHTML = playerState.slides.map(() => `<div class="player-progress-item"></div>`).join("");
+
+    // Ленивая загрузка фото слайдов
+    track.querySelectorAll("[data-ps-photo]").forEach(box => {
+        PhotoDB.get(box.dataset.psPhoto).then(rec => {
+            if (rec && rec.dataUrl) {
+                box.innerHTML = `<img src="${rec.dataUrl}" alt="">`;
+                box.onclick = (e) => { e.stopPropagation(); openLightbox(rec.dataUrl, rec.caption); };
+            } else { box.remove(); }
+        });
+    });
+}
+
+function updatePlayer() {
+    const track = document.getElementById("player-track");
+    track.style.transform = `translateX(-${playerState.cur * 100}%)`;
+    document.getElementById("player-counter").textContent = `${playerState.cur + 1} / ${playerState.slides.length}`;
+    document.querySelectorAll(".player-progress-item").forEach((el, i) => {
+        el.className = "player-progress-item";
+        if (i < playerState.cur) el.classList.add("viewed");
+        if (i === playerState.cur) el.classList.add("active");
+    });
+}
+
+function playerNext() {
+    if (playerState.cur < playerState.slides.length - 1) {
+        playerState.cur++;
+        updatePlayer();
+    } else {
+        // Конец сторис — помечаем просмотренной
+        if (playerState.currentStoryId) markStorySeen(playerState.currentStoryId);
+        // Очередь «Смотреть все»?
+        if (playerState.queue && playerState.queueIdx < playerState.queue.length - 1) {
+            playerState.queueIdx++;
+            playStory(playerState.queue[playerState.queueIdx], playerState.queue);
+        } else {
+            closePlayer();
+        }
+    }
+}
+
+function playerPrev() {
+    if (playerState.cur > 0) { playerState.cur--; updatePlayer(); }
+}
+
+function closePlayer() {
+    document.getElementById("player").classList.remove("visible");
+    if (playerState.currentStoryId) markStorySeen(playerState.currentStoryId);
+    playerState.queue = null;
+    playerState.queueIdx = 0;
+    renderStoriesBar();
+}
+
+function watchAllStories() {
+    const queue = STORIES.filter(s => !isStorySeen(s.id)).map(s => s.id);
+    if (queue.length === 0) return;
+    playerState.queueIdx = 0;
+    playStory(queue[0], queue);
+}
+
+
+// === СОБЫТИЯ ===
+function bindEvents() {
+    // Поиск
+    const searchInput = document.getElementById("search");
+    const searchClear = document.getElementById("search-clear");
+    let searchTimer;
+    searchInput.addEventListener("input", (e) => {
+        state.filter.text = e.target.value;
+        searchClear.classList.toggle("visible", !!e.target.value);
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(renderFeed, 120);
+    });
+    searchClear.onclick = () => {
+        searchInput.value = "";
+        state.filter.text = "";
+        searchClear.classList.remove("visible");
+        renderFeed();
+        searchInput.focus();
+    };
+    
+    // Кнопки
+    document.getElementById("btn-add").onclick = openAddModal;
+    document.getElementById("btn-menu").onclick = () => document.getElementById("modal-menu").classList.add("visible");
+    document.getElementById("btn-theme").onclick = toggleTheme;
+    
+    // Переключатель режимов
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.onclick = () => setMode(btn.dataset.mode);
+    });
+    
+    // Кнопка "наверх" в режиме книги
+    const btnTop = document.getElementById("btn-top");
+    btnTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+    window.addEventListener("scroll", () => {
+        if (state.mode === "book") {
+            btnTop.classList.toggle("visible", window.scrollY > 400);
+        }
+    }, { passive: true });
+    
+    // Форма добавления
+    document.getElementById("f-cancel").onclick = () => closeModal("modal-add");
+    document.getElementById("f-save").onclick = saveNewRecord;
+
+    // Фото в форме
+    document.getElementById("f-photo-btn").onclick = () => document.getElementById("file-photo").click();
+    document.getElementById("file-photo").onchange = (e) => {
+        if (e.target.files[0]) onPhotoSelected(e.target.files[0]);
+        e.target.value = ""; // позволяет выбрать тот же файл повторно
+    };
+    document.getElementById("f-photo-remove").onclick = removePhotoField;
+
+    // Лайтбокс
+    document.getElementById("lightbox-close").onclick = closeLightbox;
+    document.getElementById("lightbox").onclick = (e) => {
+        if (e.target.id === "lightbox") closeLightbox();
+    };
+
+    // === СТОРИС ===
+    // (кружки и «смотреть все» вешаются в renderStoriesBar)
+    // Проигрыватель: закрытие, тап-зоны
+    document.getElementById("player-close").onclick = closePlayer;
+    document.getElementById("player-nav-right").onclick = playerNext;
+    document.getElementById("player-nav-left").onclick = playerPrev;
+    // Свайп в проигрывателе (горизонтальный)
+    (function() {
+        const player = document.getElementById("player");
+        let sx = 0, sy = 0, tracking = false;
+        player.addEventListener("touchstart", (e) => {
+            sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true;
+        }, { passive: true });
+        player.addEventListener("touchend", (e) => {
+            if (!tracking) return; tracking = false;
+            const dx = sx - e.changedTouches[0].clientX;
+            const dy = sy - e.changedTouches[0].clientY;
+            // Горизонталь явно больше вертикали — листаем
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+                dx > 0 ? playerNext() : playerPrev();
+            }
+        }, { passive: true });
+    })();
+    
+    // Меню
+    document.getElementById("m-export-json").onclick = exportJSON;
+    document.getElementById("m-export-docx").onclick = exportDOCX;
+    document.getElementById("m-import").onclick = () => document.getElementById("file-import").click();
+    document.getElementById("m-reload").onclick = reloadCorpus;
+    document.getElementById("m-clear").onclick = clearAll;
+    document.getElementById("m-close").onclick = () => closeModal("modal-menu");
+    document.getElementById("m-find-conflicts").onclick = openConflictsSearch;
+    
+    // Модалка конфликта при сохранении
+    document.getElementById("c-cancel").onclick = () => {
+        pendingNewRecord = null;
+        closeModal("modal-conflict");
+    };
+    document.getElementById("c-create-anyway").onclick = () => {
+        if (pendingNewRecord) commitNewRecord(pendingNewRecord);
+    };
+    
+    document.getElementById("file-import").onchange = (e) => {
+        if (e.target.files[0]) importFromFile(e.target.files[0]);
+    };
+    
+    // Клик по фону модалки закрывает её
+    document.querySelectorAll(".modal-backdrop").forEach(bg => {
+        bg.addEventListener("click", (e) => {
+            if (e.target === bg) bg.classList.remove("visible");
+        });
+    });
+    
+    // Esc закрывает модалки
+    document.addEventListener("keydown", (e) => {
+        const player = document.getElementById("player");
+        if (player.classList.contains("visible")) {
+            if (e.key === "Escape") { closePlayer(); return; }
+            if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); playerNext(); return; }
+            if (e.key === "ArrowLeft") { playerPrev(); return; }
+            return;
+        }
+        if (e.key === "Escape") {
+            const lb = document.getElementById("lightbox");
+            if (lb.classList.contains("visible")) { closeLightbox(); return; }
+            document.querySelectorAll(".modal-backdrop.visible").forEach(m => m.classList.remove("visible"));
+        }
+    });
+    
+    // Ctrl+K фокус на поиск
+    document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }
+    });
+}
+
+// === СТАРТ ===
+init();
+
+// === SERVICE WORKER (минимальный — кешируем сами себя) ===
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    const swCode = `
+        const CACHE = 'mb-kb-v1';
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('activate', e => self.clients.claim());
+        self.addEventListener('fetch', e => {
+            if (e.request.method !== 'GET') return;
+            e.respondWith(
+                caches.open(CACHE).then(cache => 
+                    fetch(e.request)
+                        .then(resp => { cache.put(e.request, resp.clone()); return resp; })
+                        .catch(() => cache.match(e.request))
+                )
+            );
+        });
+    `;
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+</script>
+</body>
+</html>
