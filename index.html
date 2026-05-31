@@ -796,6 +796,71 @@ mark {
     gap: 4px;
 }
 
+/* Список-регламент: короткие правила пунктами (как в Word) */
+.book-list {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+}
+.book-li {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 7px 0 7px 22px;
+    border-bottom: 1px solid var(--brd);
+    cursor: pointer;
+    transition: background .12s var(--ease-soft);
+}
+.book-li:last-child { border-bottom: none; }
+.book-li:hover { background: var(--surf-2); }
+.book-li:hover .book-li-edit { opacity: 1; }
+/* маркер-точка */
+.book-li::before {
+    content: "";
+    position: absolute;
+    left: 6px; top: 15px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--t3);
+}
+.book-li[data-priority="антипример"]::before { background: var(--danger); }
+.book-li[data-priority="задача"]::before { background: var(--warn); }
+.book-li[data-priority="решение"]::before { background: var(--ok); }
+.book-li[data-priority="обсуждается"]::before { background: var(--acc); }
+
+.book-li-text {
+    flex: 1;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--t1);
+    letter-spacing: -.1px;
+}
+.book-li-text strong { font-weight: 600; }
+.book-li-text a { color: var(--acc); text-decoration: underline; text-underline-offset: 2px; word-break: break-word; }
+.book-li-mark {
+    flex-shrink: 0;
+    align-self: center;
+}
+.book-li-photo {
+    flex-shrink: 0;
+    width: 16px; height: 16px;
+    border-radius: 3px;
+    background: var(--surf-2) center/cover no-repeat;
+    border: 1px solid var(--brd);
+    align-self: center;
+    cursor: zoom-in;
+}
+.book-li-edit {
+    position: static;
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    opacity: 0;
+    align-self: center;
+}
+@media (hover: none) { .book-li-edit { opacity: .4; } }
+
 /* Кнопка "наверх" */
 .book-top {
     position: fixed;
@@ -3744,6 +3809,43 @@ function chapterId(cat) {
     return "chap-" + cat.replace(/[^a-zа-я0-9-]/gi, "");
 }
 
+// Нормализация для сравнения title и начала content
+function normRu(s) {
+    return (s || "").toLowerCase().replace(/ё/g, "е").replace(/[^a-zа-я0-9 ]/g, "").replace(/\s+/g, " ").trim();
+}
+
+// «Короткая» запись = правило в одну фразу: показываем пунктом списка без заголовка.
+// Критерии: нет фото, content короткий (≤ ~140 симв) и по сути одно предложение.
+function isShortRule(r) {
+    if (r.hasPhoto) return false;                 // фото → развёрнутый вид
+    const c = (r.content || "").trim();
+    if (!c) return false;
+    if (c.length > 180) return false;             // длинный текст → абзац
+    // одно предложение: не больше одной точки в середине
+    const innerDots = (c.slice(0, -1).match(/[.!?]/g) || []).length;
+    if (innerDots > 1) return false;
+    return true;
+}
+
+// Текст короткой записи для пункта списка: убираем дубль заголовка.
+// Если content почти повторяет title — показываем то, что длиннее/информативнее.
+function bookEntryText(r) {
+    const title = (r.title || "").trim();
+    const content = (r.content || "").trim();
+    const escLink = (s) => escapeHtml(s).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+
+    if (!content) return escLink(title);
+    if (!title) return escLink(content);
+
+    const nt = normRu(title), nc = normRu(content);
+    // Если content начинается с заголовка или заголовок входит в content — заголовок дублирует, берём content
+    if (nc.startsWith(nt) || nc.includes(nt)) return escLink(content);
+    // Если заголовок информативнее (content — его пересказ): начинается ли title с content
+    if (nt.startsWith(nc)) return escLink(title);
+    // Иначе оба несут смысл: заголовок жирным + пояснение
+    return `<strong>${escapeHtml(title)}.</strong> ${escLink(content)}`;
+}
+
 function renderBook() {
     const book = document.getElementById("book");
     if (state.records.length === 0) {
@@ -3804,24 +3906,51 @@ function renderBook() {
             if (sub) {
                 html += `<h3 class="book-section-title">${escapeHtml(sub)}</h3>`;
             }
-            subs[sub].forEach(r => {
-                const priority = r.priority || r.type || "норма";
-                // Кликабельные ссылки внутри текста
-                let body = escapeHtml(r.content).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-                
-                const isQuiet = (priority === "стандарт" || priority === "норма");
-                html += `
-                    <div class="book-entry" data-priority="${escapeHtml(priority)}" data-id="${escapeHtml(r.id)}">
-                        ${isQuiet ? "" : `<div class="book-entry-head"><span class="book-entry-mark">${escapeHtml(priority)}</span></div>`}
-                        <button class="book-entry-edit book-entry-edit-floating" data-edit-id="${escapeHtml(r.id)}" title="Редактировать" aria-label="Редактировать">
-                            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                        </button>
-                        <h4 class="book-entry-title">${escapeHtml(r.title)}</h4>
-                        ${r.hasPhoto ? `<div class="entry-photo" data-book-photo="${r.id}"><div class="entry-photo-loading">Загрузка фото…</div></div>` : ""}
-                        <div class="book-entry-body">${body}</div>
-                    </div>
-                `;
-            });
+
+            // Умный рендер: разделяем записи на «короткие» (пунктами списка)
+            // и «развёрнутые» (заголовок + абзац). Соседние короткие группируем в один список.
+            const entries = subs[sub];
+            let i = 0;
+            while (i < entries.length) {
+                const r = entries[i];
+                if (isShortRule(r)) {
+                    // собираем подряд идущие короткие в один <ul>
+                    let listHtml = "";
+                    while (i < entries.length && isShortRule(entries[i])) {
+                        const e = entries[i];
+                        const pr = e.priority || e.type || "норма";
+                        const quiet = (pr === "стандарт" || pr === "норма");
+                        const text = bookEntryText(e);
+                        listHtml += `
+                            <li class="book-li" data-id="${escapeHtml(e.id)}" data-priority="${escapeHtml(pr)}">
+                                ${quiet ? "" : `<span class="book-entry-mark book-li-mark">${escapeHtml(pr)}</span>`}
+                                <span class="book-li-text">${text}</span>
+                                ${e.hasPhoto ? `<span class="book-li-photo" data-book-photo="${e.id}" title="Фото"></span>` : ""}
+                                <button class="book-entry-edit book-li-edit" data-edit-id="${escapeHtml(e.id)}" aria-label="Редактировать">
+                                    <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                </button>
+                            </li>`;
+                        i++;
+                    }
+                    html += `<ul class="book-list">${listHtml}</ul>`;
+                } else {
+                    // развёрнутая запись: заголовок-подзаголовок + абзац
+                    const priority = r.priority || r.type || "норма";
+                    const quiet = (priority === "стандарт" || priority === "норма");
+                    let body = escapeHtml(r.content).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+                    html += `
+                        <div class="book-entry" data-priority="${escapeHtml(priority)}" data-id="${escapeHtml(r.id)}">
+                            ${quiet ? "" : `<div class="book-entry-head"><span class="book-entry-mark">${escapeHtml(priority)}</span></div>`}
+                            <button class="book-entry-edit book-entry-edit-floating" data-edit-id="${escapeHtml(r.id)}" title="Редактировать" aria-label="Редактировать">
+                                <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            </button>
+                            <h4 class="book-entry-title">${escapeHtml(r.title)}</h4>
+                            ${r.hasPhoto ? `<div class="entry-photo" data-book-photo="${r.id}"><div class="entry-photo-loading">Загрузка фото…</div></div>` : ""}
+                            <div class="book-entry-body">${body}</div>
+                        </div>`;
+                    i++;
+                }
+            }
         });
         
         html += `</article>`;
@@ -3859,8 +3988,18 @@ function renderBook() {
         });
     });
 
-    // Lazy-загрузка фото в книге
-    book.querySelectorAll("[data-book-photo]").forEach(box => {
+    // Клик по пункту списка-регламента открывает просмотр
+    book.querySelectorAll("li.book-li[data-id]").forEach(li => {
+        li.addEventListener("click", (e) => {
+            if (e.target.tagName === "A") return;
+            if (e.target.closest(".book-li-photo")) return;
+            if (e.target.closest(".book-li-edit")) return;
+            openRecord(li.dataset.id);
+        });
+    });
+
+    // Lazy-загрузка развёрнутых фото в книге (блок entry-photo)
+    book.querySelectorAll(".entry-photo[data-book-photo]").forEach(box => {
         const id = box.dataset.bookPhoto;
         PhotoDB.get(id).then(rec => {
             if (rec && rec.dataUrl) {
@@ -3869,6 +4008,19 @@ function renderBook() {
                 box.onclick = (e) => { e.stopPropagation(); openLightbox(rec.dataUrl, rec.caption); };
             } else {
                 box.remove();
+            }
+        });
+    });
+
+    // Lazy-загрузка фото-миниатюр в пунктах списка
+    book.querySelectorAll(".book-li-photo[data-book-photo]").forEach(mini => {
+        const id = mini.dataset.bookPhoto;
+        PhotoDB.get(id).then(rec => {
+            if (rec && rec.dataUrl) {
+                mini.style.backgroundImage = `url(${rec.dataUrl})`;
+                mini.onclick = (e) => { e.stopPropagation(); openLightbox(rec.dataUrl, rec.caption); };
+            } else {
+                mini.remove();
             }
         });
     });
