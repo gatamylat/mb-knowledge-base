@@ -1,5 +1,12 @@
 [
   {
+    "id": "about",
+    "file": "stories/about.json",
+    "title": "О программе",
+    "sub": "что умеет ТехЧекПро",
+    "icon": "?"
+  },
+  {
     "id": "zerkalo",
     "file": "stories/zerkalo.json",
     "title": "Работа с зеркалом",
