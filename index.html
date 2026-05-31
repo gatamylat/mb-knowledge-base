@@ -1920,6 +1920,85 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     margin-top: 12px; line-height: 1.5;
 }
 
+/* === Богатые блоки сторис (стиль HR) === */
+/* Карточка с kicker + h1 + буллетами */
+.ps-rich-card {
+    background: var(--surf);
+    border: 1px solid var(--brd);
+    border-radius: var(--r-card);
+    padding: 20px 18px;
+    box-shadow: var(--sh-2);
+}
+.ps-kicker {
+    font-family: var(--sans);
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .6px;
+    color: var(--acc);
+    margin-bottom: 8px;
+}
+.ps-h1 {
+    font-family: var(--serif);
+    font-size: 22px; font-weight: 500;
+    line-height: 1.22; letter-spacing: -.3px;
+    color: var(--t1);
+    margin-bottom: 16px;
+}
+.ps-bullets { display: flex; flex-direction: column; gap: 14px; }
+.ps-bullet { display: flex; gap: 12px; align-items: flex-start; }
+.ps-b-ic {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    background: var(--acc-bg); color: var(--acc);
+}
+.ps-b-ic.green { background: rgba(46,189,82,.1); color: var(--ok); }
+.ps-b-ic.orange { background: rgba(232,154,10,.1); color: var(--warn); }
+.ps-b-ic.red { background: rgba(232,69,58,.1); color: var(--danger); }
+.ps-b-title {
+    font-family: var(--sans);
+    font-size: 15px; font-weight: 600;
+    color: var(--t1); line-height: 1.3;
+}
+.ps-b-desc {
+    font-family: var(--sans);
+    font-size: 13.5px; color: var(--t2);
+    line-height: 1.45; margin-top: 2px;
+}
+/* Insight с бейджем */
+.ps-insight .ps-badge {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .4px;
+    color: var(--acc);
+    background: var(--acc-bg);
+    padding: 2px 8px; border-radius: var(--r-pill);
+    margin-right: 6px;
+}
+/* Hero-кольцо */
+.ps-hero-ring {
+    width: 124px; height: 124px;
+    border-radius: 50%;
+    border: 2px solid var(--acc);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 22px;
+    background: var(--acc-bg);
+}
+.ps-hero-big {
+    font-family: var(--serif);
+    font-size: 34px; font-weight: 500;
+    color: var(--acc); line-height: 1;
+}
+.ps-hero-small {
+    font-family: var(--sans);
+    font-size: 11px; font-weight: 600;
+    color: var(--t2); margin-top: 4px;
+    text-transform: uppercase; letter-spacing: .5px;
+}
+
 /* ======================================================== */
 /* === ИИ-ПОИСК (спросить базу) =========================== */
 /* ======================================================== */
@@ -4335,7 +4414,12 @@ function buildSlides(story) {
     const slides = [];
     // Обложка
     if (story.cover) {
-        slides.push({ kind: "cover", tag: story.cover.tag, title: story.cover.title, sub: story.cover.sub, brand: story.cover.brand });
+        slides.push({
+            kind: "cover",
+            tag: story.cover.tag, title: story.cover.title, sub: story.cover.sub,
+            brand: story.cover.brand,
+            ringBig: story.cover.ring_big, ringSmall: story.cover.ring_small
+        });
     }
     // Контент-слайды
     const items = story.slides || [];
@@ -4350,13 +4434,18 @@ function buildSlides(story) {
             body: sl.body || (rec ? rec.content : ""),
             insight: sl.note || sl.insight || "",
             insightKind: rec ? (rec.priority || rec.type) : "",
+            badge: sl.badge || "",
             photoId: (rec && rec.hasPhoto) ? rec.id : null,
-            position: `${i + 1} из ${items.length}`
+            position: `${i + 1} из ${items.length}`,
+            // богатые поля (опциональны)
+            kicker: sl.kicker || "",
+            h1: sl.h1 || "",
+            bullets: Array.isArray(sl.bullets) ? sl.bullets : null
         });
     });
     // Финал
     if (story.final) {
-        slides.push({ kind: "final", title: story.final.title, sub: story.final.sub });
+        slides.push({ kind: "final", title: story.final.title, sub: story.final.sub, note: story.final.note });
     }
     return slides;
 }
@@ -4387,6 +4476,7 @@ function renderPlayerSlides() {
         if (s.kind === "cover") {
             return `<div class="player-slide cover">
                 ${s.brand ? `<div class="ps-cover-brand">${escapeHtml(s.brand)}</div>` : `<div class="ps-cover-brand">ТехЧекПро</div>`}
+                ${s.ringBig ? `<div class="ps-hero-ring"><div class="ps-hero-big">${escapeHtml(s.ringBig)}</div>${s.ringSmall ? `<div class="ps-hero-small">${escapeHtml(s.ringSmall)}</div>` : ""}</div>` : ""}
                 ${s.tag ? `<div class="ps-tag">${escapeHtml(s.tag)}</div>` : ""}
                 <div class="ps-title">${escapeHtml(s.title || "")}</div>
                 ${s.sub ? `<div class="ps-sub">${escapeHtml(s.sub)}</div>` : ""}
@@ -4396,20 +4486,49 @@ function renderPlayerSlides() {
             return `<div class="player-slide final">
                 <div class="ps-title">${escapeHtml(s.title || "Конец")}</div>
                 ${s.sub ? `<div class="ps-final-note">${escapeHtml(s.sub)}</div>` : ""}
+                ${s.note ? `<div class="ps-final-note" style="font-size:13px;color:var(--t3);margin-top:18px;">${escapeHtml(s.note)}</div>` : ""}
             </div>`;
         }
         // content
+        const insightHtml = s.insight ? `<div class="ps-insight" data-kind="${escapeHtml(s.insightKind || "")}">
+            <span class="ps-insight-ic">▸</span>
+            <span>${s.badge ? `<span class="ps-badge">${escapeHtml(s.badge)}</span>` : ""}${escapeHtml(s.insight)}</span>
+        </div>` : "";
+
+        // Богатый слайд: есть буллеты → карточка с kicker/h1/bullets
+        if (s.bullets && s.bullets.length) {
+            const bulletsHtml = s.bullets.map(b => `
+                <div class="ps-bullet">
+                    <span class="ps-b-ic ${escapeHtml(b.color || "")}">${b.icon ? escapeHtml(b.icon) : "●"}</span>
+                    <span>
+                        <span class="ps-b-title">${escapeHtml(b.title || "")}</span>
+                        ${b.desc ? `<span class="ps-b-desc">${escapeHtml(b.desc)}</span>` : ""}
+                    </span>
+                </div>`).join("");
+            return `<div class="player-slide content">
+                ${s.tag ? `<div class="ps-tag">${escapeHtml(s.tag)}</div>` : ""}
+                <div class="ps-title">${escapeHtml(s.title || "")}</div>
+                ${s.sub ? `<div class="ps-sub">${escapeHtml(s.sub)}</div>` : ""}
+                ${s.photoId ? `<div class="ps-photo" data-ps-photo="${s.photoId}"></div>` : ""}
+                <div class="ps-rich-card">
+                    ${s.kicker ? `<div class="ps-kicker">${escapeHtml(s.kicker)}</div>` : ""}
+                    ${s.h1 ? `<div class="ps-h1">${escapeHtml(s.h1)}</div>` : ""}
+                    <div class="ps-bullets">${bulletsHtml}</div>
+                </div>
+                ${insightHtml}
+            </div>`;
+        }
+
+        // Простой слайд (старый формат: body)
         let bodyHtml = escapeHtml(s.body || "").replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--acc)">$1</a>');
         return `<div class="player-slide content">
-            ${s.tag ? `<div class="ps-tag">${escapeHtml(s.tag)} · ${escapeHtml(s.position)}</div>` : ""}
+            ${s.tag ? `<div class="ps-tag">${escapeHtml(s.tag)}${s.position ? " · " + escapeHtml(s.position) : ""}</div>` : ""}
             <div class="ps-title">${escapeHtml(s.title || "")}</div>
             ${s.sub ? `<div class="ps-sub">${escapeHtml(s.sub)}</div>` : ""}
             ${s.photoId ? `<div class="ps-photo" data-ps-photo="${s.photoId}"></div>` : ""}
             <div class="ps-card">
                 <div class="ps-body">${bodyHtml}</div>
-                ${s.insight ? `<div class="ps-insight" data-kind="${escapeHtml(s.insightKind || "")}">
-                    <span class="ps-insight-ic">▸</span><span>${escapeHtml(s.insight)}</span>
-                </div>` : ""}
+                ${insightHtml}
             </div>
         </div>`;
     }).join("");
