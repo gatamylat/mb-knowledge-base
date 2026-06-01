@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -7,10 +8,12 @@
 <title>МБ База Знаний</title>
 
 <!-- PWA манифест встроенный -->
+
 <link rel="manifest" href='data:application/json;charset=utf-8,{"name":"МБ База Знаний","short_name":"МБ База","start_url":".","display":"standalone","background_color":"%23FAF9F5","theme_color":"%23FAF9F5","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2724%27 fill=%27%23FAF9F5%27/%3E%3Ctext y=%27.95em%27 x=%2738%27 font-size=%27130%27 font-family=%27serif%27 fill=%27%23463F30%27%3E%26%23128218%3B%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='.9em' font-size='52'%3E📚%3C/text%3E%3C/svg%3E">
 
 <!-- Шрифты: Playfair Display для заголовков (книжный), DM Sans для тела -->
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
@@ -2129,9 +2132,49 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     margin-top: 16px;
     font-family: var(--sans); font-size: 16px; line-height: 1.6;
     color: var(--t1); letter-spacing: -.1px;
-    white-space: pre-wrap;
 }
 .ai-answer:empty { display: none; }
+.ai-answer p { margin: 0 0 12px; }
+.ai-answer p:last-child { margin-bottom: 0; }
+.ai-answer strong { font-weight: 600; }
+.ai-answer em { font-style: italic; }
+.ai-ul {
+    margin: 4px 0 12px;
+    padding-left: 4px;
+    list-style: none;
+}
+.ai-ul li {
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 5px;
+    line-height: 1.5;
+}
+.ai-ul li::before {
+    content: "";
+    position: absolute;
+    left: 4px; top: 11px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--t3);
+}
+.ai-hr {
+    border: none;
+    border-top: 1px solid var(--brd);
+    margin: 16px 0;
+}
+/* Бейдж номера-источника [N] */
+.ai-ref {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    min-width: 18px; height: 18px;
+    padding: 0 5px;
+    border-radius: 6px;
+    background: var(--acc-bg);
+    color: var(--acc);
+    font-size: 12px; font-weight: 600;
+    vertical-align: baseline;
+    line-height: 18px;
+}
 .ai-thinking {
     font-family: var(--sans); font-size: 14px; color: var(--t2);
     margin-top: 16px; display: flex; align-items: center; gap: 8px;
@@ -2174,6 +2217,7 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 }
 .ai-needkey a { color: var(--acc); cursor: pointer; text-decoration: underline; }
 </style>
+
 </head>
 <body>
 
@@ -2229,14 +2273,17 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 <div class="stats" id="stats"></div>
 
 <!-- Лента кружков-сторис (над фидом, как в Instagram) -->
+
 <div class="stories-bar" id="stories-bar" hidden></div>
 
 <main class="feed" id="feed"></main>
 
 <!-- Режим: Книга -->
+
 <section class="book" id="book" hidden></section>
 
 <!-- Полноэкранный проигрыватель сторис -->
+
 <div class="player" id="player">
     <div class="player-frame" id="player-frame">
         <div class="player-progress" id="player-progress"></div>
@@ -2251,21 +2298,25 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- FAB: добавить запись -->
+
 <button class="fab" id="btn-add" title="Добавить запись" aria-label="Добавить запись">
     <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
 </button>
 
 <!-- Кнопка "наверх" (видна только в режиме Книга) -->
+
 <button class="book-top" id="btn-top" title="Наверх" aria-label="Наверх">
     <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
 <!-- Модалка просмотра записи -->
+
 <div class="modal-backdrop" id="modal-view">
     <div class="modal" id="modal-view-content"></div>
 </div>
 
 <!-- Модалка добавления -->
+
 <div class="modal-backdrop" id="modal-add">
     <div class="modal form-modal">
         <button class="modal-close" onclick="closeModal('modal-add')" aria-label="Закрыть">
@@ -2339,6 +2390,7 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Модалка: возможные конфликты при сохранении -->
+
 <div class="modal-backdrop" id="modal-conflict">
     <div class="modal form-modal">
         <button class="modal-close" onclick="closeModal('modal-conflict')" aria-label="Закрыть">
@@ -2355,6 +2407,7 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Модалка: поиск конфликтов в базе -->
+
 <div class="modal-backdrop" id="modal-conflicts">
     <div class="modal form-modal">
         <button class="modal-close" onclick="closeModal('modal-conflicts')" aria-label="Закрыть">
@@ -2367,6 +2420,7 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Меню -->
+
 <div class="modal-backdrop" id="modal-menu">
     <div class="modal form-modal">
         <button class="modal-close" id="m-close" aria-label="Закрыть">
@@ -2412,6 +2466,7 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 <input type="file" id="file-photo" accept="image/*" style="display:none;">
 
 <!-- Лайтбокс — полноэкранный просмотр фото узла -->
+
 <div class="lightbox" id="lightbox">
     <button class="lightbox-close" id="lightbox-close" aria-label="Закрыть">
         <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -2421,6 +2476,7 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Модалка: ИИ-поиск «Спросить базу» -->
+
 <div class="modal-backdrop ai-panel" id="modal-ai">
     <div class="modal form-modal">
         <button class="modal-close" id="ai-close" aria-label="Закрыть">
@@ -2437,6 +2493,7 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Модалка: настройки ИИ (ключ) -->
+
 <div class="modal-backdrop" id="modal-ai-settings">
     <div class="modal form-modal">
         <button class="modal-close" id="ai-set-close" aria-label="Закрыть">
@@ -4418,16 +4475,49 @@ async function askKnowledgeBase(question) {
     }
 }
 
+// Лёгкий безопасный рендер markdown для ответа ИИ.
+// Построчный разбор: абзацы, списки (даже вплотную к тексту), разделители.
+function renderMarkdownLite(text) {
+    let t = escapeHtml(text);
+    t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    t = t.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
+    t = t.replace(/\[(\d+)\]/g, '<span class="ai-ref">$1</span>');
+
+    const lines = t.split("\n");
+    let html = "";
+    let para = [];      // накопитель строк текущего абзаца
+    let list = [];      // накопитель пунктов текущего списка
+
+    const flushPara = () => {
+        if (para.length) { html += `<p>${para.join("<br>")}</p>`; para = []; }
+    };
+    const flushList = () => {
+        if (list.length) { html += `<ul class="ai-ul">${list.map(li => `<li>${li}</li>`).join("")}</ul>`; list = []; }
+    };
+
+    lines.forEach(raw => {
+        const line = raw.trim();
+        if (line === "") { flushList(); flushPara(); return; }
+        if (/^---+$/.test(line)) { flushList(); flushPara(); html += '<hr class="ai-hr">'; return; }
+        const m = line.match(/^[-•]\s+(.*)$/);
+        if (m) { flushPara(); list.push(m[1]); return; }
+        // обычная строка текста
+        flushList();
+        para.push(line);
+    });
+    flushList(); flushPara();
+    return html;
+}
+
 function renderAiAnswer(answer, sources) {
     const result = document.getElementById("ai-result");
-    // Ссылки [N] делаем кликабельными визуально (просто текст), источники — ниже
-    const answerHtml = escapeHtml(answer);
+    const answerHtml = renderMarkdownLite(answer);
     let html = `<div class="ai-answer">${answerHtml}</div>`;
     if (sources.length) {
         html += `<div class="ai-sources"><div class="ai-sources-label">Источники — нормы из базы</div>`;
         sources.forEach((r, i) => {
             html += `<div class="ai-source" data-ai-src="${escapeHtml(r.id)}">
-                <div class="ai-source-title">[${i + 1}] ${escapeHtml(r.title)}</div>
+                <div class="ai-source-title"><span class="ai-ref">${i + 1}</span> ${escapeHtml(r.title)}</div>
                 <div class="ai-source-meta">${escapeHtml(r.category)}${r.subcategory ? " · " + escapeHtml(r.subcategory) : ""} · ${escapeHtml(r.priority || r.type || "")}</div>
             </div>`;
         });
@@ -4944,5 +5034,6 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register(swUrl).catch(() => {});
 }
 </script>
+
 </body>
 </html>
