@@ -302,30 +302,95 @@ input, textarea, select {
 .search-clear svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
 
 /* === ФИЛЬТРЫ === */
+/* Панель-кнопка «Фильтры» */
+.filters-bar {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 12px 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--sans);
+    font-size: 14px; font-weight: 500;
+    padding: 8px 14px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--brd);
+    background: transparent;
+    color: var(--t2);
+    cursor: pointer;
+    transition: all .15s var(--ease-soft);
+}
+.filters-toggle:hover { border-color: var(--brd-2); color: var(--t1); }
+.filters-toggle.open { background: var(--surf-2); color: var(--t1); }
+.filters-toggle.has-active { border-color: var(--acc); color: var(--acc); }
+.filters-toggle svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.filters-count {
+    background: var(--acc); color: #fff;
+    font-size: 11px; font-weight: 600;
+    min-width: 18px; height: 18px;
+    border-radius: 9px;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0 5px;
+}
+.filters-reset {
+    font-family: var(--sans);
+    font-size: 13px; font-weight: 500;
+    padding: 6px 10px;
+    border: none; background: transparent;
+    color: var(--t2); cursor: pointer;
+    border-radius: var(--r-pill);
+    transition: color .15s var(--ease-soft);
+}
+.filters-reset:hover { color: var(--danger); }
+
 .filters {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 14px 20px 0;
+    padding: 12px 20px 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+    animation: filtersIn .25s var(--ease-soft);
 }
+@keyframes filtersIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
 .filter-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 6px;
     align-items: center;
 }
+/* Секция тегов */
+.filter-tags-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--brd);
+}
+.filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 170px;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+.filter-tags::-webkit-scrollbar { display: none; }
+.chip-tag { font-size: 13px; padding: 5px 10px; }
+.chip-tag.active { background: var(--acc); border-color: var(--acc); color: #fff; }
 
 .filter-label {
     font-family: var(--serif);
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 500;
-    text-transform: none;
     letter-spacing: -0.3px;
     color: var(--t2);
-    margin-right: 10px;
 }
 
 .chip {
@@ -2141,12 +2206,19 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     </div>
 </header>
 
-<div class="filters" id="filters">
-    <div class="filter-row" id="filter-categories">
-        <span class="filter-label">Категория</span>
-    </div>
-    <div class="filter-row" id="filter-priorities">
-        <span class="filter-label">Тип</span>
+<div class="filters-bar">
+    <button class="filters-toggle" id="filters-toggle" aria-expanded="false">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+        <span>Фильтры</span>
+        <span class="filters-count" id="filters-count" hidden>0</span>
+    </button>
+    <button class="filters-reset" id="filters-reset" hidden>Сбросить</button>
+</div>
+<div class="filters" id="filters" hidden>
+    <div class="filter-row" id="filter-categories"></div>
+    <div class="filter-tags-wrap" id="filter-tags-wrap" hidden>
+        <span class="filter-label">Теги</span>
+        <div class="filter-tags" id="filter-tags"></div>
     </div>
 </div>
 
@@ -2493,7 +2565,8 @@ let state = {
     filter: {
         text: "",
         categories: new Set(),
-        priorities: new Set()
+        priorities: new Set(),
+        tags: new Set()
     }
 };
 
@@ -2641,10 +2714,12 @@ function categoryColor(name) {
 }
 
 function renderFilters() {
+    // Единый поток: категории → типы → устарело (без подписей-заголовков)
+    const flow = document.getElementById("filter-categories");
+    flow.innerHTML = "";
+
+    // Категории
     const catCounts = getCategoryCounts();
-    const catEl = document.getElementById("filter-categories");
-    catEl.innerHTML = '<span class="filter-label">Категория</span>';
-    
     const cats = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a]);
     cats.forEach(cat => {
         const chip = document.createElement("button");
@@ -2652,13 +2727,11 @@ function renderFilters() {
         chip.style.setProperty('--chip-color', categoryColor(cat));
         chip.innerHTML = `<span class="chip-dot"></span>${cat}<span class="chip-count">${catCounts[cat]}</span>`;
         chip.onclick = () => toggleFilter("categories", cat);
-        catEl.appendChild(chip);
+        flow.appendChild(chip);
     });
-    
+
+    // Типы — в том же потоке
     const prCounts = getPriorityCounts();
-    const prEl = document.getElementById("filter-priorities");
-    prEl.innerHTML = '<span class="filter-label">Тип</span>';
-    
     PRIORITY_ORDER.forEach(p => {
         if (!prCounts[p]) return;
         const chip = document.createElement("button");
@@ -2666,10 +2739,10 @@ function renderFilters() {
         chip.setAttribute("data-priority", p);
         chip.innerHTML = `${p}<span class="chip-count">${prCounts[p]}</span>`;
         chip.onclick = () => toggleFilter("priorities", p);
-        prEl.appendChild(chip);
+        flow.appendChild(chip);
     });
-    
-    // Чип "устарело" — отдельно, если есть устаревшие записи
+
+    // Чип "устарело"
     const supersededCount = getSupersededCount();
     if (supersededCount > 0) {
         const chip = document.createElement("button");
@@ -2677,14 +2750,78 @@ function renderFilters() {
         chip.setAttribute("data-priority", "устарело");
         chip.innerHTML = `устарело<span class="chip-count">${supersededCount}</span>`;
         chip.onclick = () => toggleFilter("priorities", "устарело");
-        prEl.appendChild(chip);
+        flow.appendChild(chip);
     }
+
+    // Облако всех тегов
+    const tagCounts = getTagCounts();
+    const tagWrap = document.getElementById("filter-tags-wrap");
+    const tagEl = document.getElementById("filter-tags");
+    const tagNames = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a] || a.localeCompare(b, "ru"));
+    if (tagNames.length === 0) {
+        tagWrap.hidden = true;
+    } else {
+        tagWrap.hidden = false;
+        tagEl.innerHTML = "";
+        tagNames.forEach(t => {
+            const chip = document.createElement("button");
+            chip.className = "chip chip-tag" + (state.filter.tags.has(t) ? " active" : "");
+            chip.innerHTML = `${escapeHtml(t)}<span class="chip-count">${tagCounts[t]}</span>`;
+            chip.onclick = () => toggleFilter("tags", t);
+            tagEl.appendChild(chip);
+        });
+    }
+
+    // Счётчик активных фильтров на кнопке
+    const activeCount = state.filter.categories.size + state.filter.priorities.size + state.filter.tags.size;
+    const countEl = document.getElementById("filters-count");
+    const resetEl = document.getElementById("filters-reset");
+    if (activeCount > 0) {
+        countEl.textContent = activeCount;
+        countEl.hidden = false;
+        resetEl.hidden = false;
+        document.getElementById("filters-toggle").classList.add("has-active");
+    } else {
+        countEl.hidden = true;
+        resetEl.hidden = true;
+        document.getElementById("filters-toggle").classList.remove("has-active");
+    }
+}
+
+// Подсчёт тегов по всем активным записям
+function getTagCounts() {
+    const counts = {};
+    state.records.forEach(r => {
+        if (r.status === "superseded") return;
+        (r.tags || []).forEach(t => {
+            const tag = t.toLowerCase().trim();
+            if (tag) counts[tag] = (counts[tag] || 0) + 1;
+        });
+    });
+    return counts;
 }
 
 function toggleFilter(type, value) {
     const set = state.filter[type];
     if (set.has(value)) set.delete(value);
     else set.add(value);
+    renderFilters();
+    renderFeed();
+}
+
+function toggleFiltersPanel() {
+    const panel = document.getElementById("filters");
+    const toggle = document.getElementById("filters-toggle");
+    const willShow = panel.hidden;
+    panel.hidden = !willShow;
+    toggle.setAttribute("aria-expanded", willShow ? "true" : "false");
+    toggle.classList.toggle("open", willShow);
+}
+
+function resetFilters() {
+    state.filter.categories.clear();
+    state.filter.priorities.clear();
+    state.filter.tags.clear();
     renderFilters();
     renderFeed();
 }
@@ -2748,6 +2885,13 @@ function filterRecords() {
         const activePriorities = new Set([...state.filter.priorities].filter(x => x !== "устарело"));
         if (activePriorities.size > 0 && !activePriorities.has(p)) {
             return false;
+        }
+        // Фильтр по тегам (AND: запись должна содержать все выбранные теги)
+        if (state.filter.tags.size > 0) {
+            const recTags = new Set((r.tags || []).map(t => t.toLowerCase()));
+            for (const t of state.filter.tags) {
+                if (!recTags.has(t)) return false;
+            }
         }
         // Поиск по тексту
         if (state.filter.text) {
@@ -4113,6 +4257,7 @@ function setMode(mode) {
     const book = document.getElementById("book");
     const storiesBar = document.getElementById("stories-bar");
     const filters = document.getElementById("filters");
+    const filtersBar = document.querySelector(".filters-bar");
     const stats = document.getElementById("stats");
     const search = document.querySelector(".search-wrap");
     const fab = document.getElementById("btn-add");
@@ -4127,7 +4272,9 @@ function setMode(mode) {
     // Прячем всё, потом показываем нужное
     feed.style.display = "none";
     book.hidden = true;
-    filters.style.display = "none";
+    filtersBar.style.display = "none";
+    filters.hidden = true; // панель всегда сворачивается при смене режима
+    document.getElementById("filters-toggle").classList.remove("open");
     stats.style.display = "none";
     search.style.display = "none";
     fab.style.display = "none";
@@ -4140,7 +4287,7 @@ function setMode(mode) {
         window.scrollTo({ top: 0, behavior: "auto" });
     } else {
         feed.style.display = "";
-        filters.style.display = "";
+        filtersBar.style.display = "";
         stats.style.display = "";
         search.style.display = "";
         fab.style.display = "";
@@ -4620,6 +4767,10 @@ function bindEvents() {
     document.getElementById("btn-add").onclick = openAddModal;
     document.getElementById("btn-menu").onclick = () => document.getElementById("modal-menu").classList.add("visible");
     document.getElementById("btn-theme").onclick = toggleTheme;
+
+    // Фильтры — свернуть/развернуть и сброс
+    document.getElementById("filters-toggle").onclick = toggleFiltersPanel;
+    document.getElementById("filters-reset").onclick = resetFilters;
     
     // Переключатель режимов
     document.querySelectorAll(".mode-btn").forEach(btn => {
