@@ -2162,6 +2162,29 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     border-top: 1px solid var(--brd);
     margin: 16px 0;
 }
+/* Заголовки в ответе ИИ */
+.ai-h {
+    font-family: var(--serif);
+    color: var(--t1);
+    letter-spacing: -.3px;
+    line-height: 1.25;
+    margin: 18px 0 8px;
+}
+.ai-h:first-child { margin-top: 0; }
+.ai-h1 { font-size: 22px; font-weight: 500; }
+.ai-h2 { font-size: 19px; font-weight: 500; }
+.ai-h3 { font-size: 16px; font-weight: 600; font-family: var(--sans); letter-spacing: -.1px; }
+/* Блок-цитата (итог) */
+.ai-quote {
+    margin: 14px 0 0;
+    padding: 12px 16px;
+    border-left: 3px solid var(--acc);
+    background: var(--acc-bg);
+    border-radius: 0 var(--r-input) var(--r-input) 0;
+    font-family: var(--sans);
+    font-size: 15px; line-height: 1.55;
+    color: var(--t1);
+}
 /* Бейдж номера-источника [N] */
 .ai-ref {
     display: inline-flex;
@@ -4499,6 +4522,21 @@ function renderMarkdownLite(text) {
         const line = raw.trim();
         if (line === "") { flushList(); flushPara(); return; }
         if (/^---+$/.test(line)) { flushList(); flushPara(); html += '<hr class="ai-hr">'; return; }
+        // Заголовки ###, ##, #
+        const h = line.match(/^(#{1,6})\s+(.*)$/);
+        if (h) {
+            flushList(); flushPara();
+            const lvl = Math.min(h[1].length, 3); // h1-h3
+            html += `<div class="ai-h ai-h${lvl}">${h[2]}</div>`;
+            return;
+        }
+        // Блок-цитата > ...
+        const q = line.match(/^&gt;\s*(.*)$/);
+        if (q) {
+            flushList(); flushPara();
+            html += `<blockquote class="ai-quote">${q[1]}</blockquote>`;
+            return;
+        }
         const m = line.match(/^[-•]\s+(.*)$/);
         if (m) { flushPara(); list.push(m[1]); return; }
         // обычная строка текста
