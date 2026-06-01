@@ -337,6 +337,7 @@ input, textarea, select {
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 5px;
 }
+.filters-count[hidden] { display: none; }
 .filters-reset {
     font-family: var(--sans);
     font-size: 13px; font-weight: 500;
@@ -347,6 +348,7 @@ input, textarea, select {
     transition: color .15s var(--ease-soft);
 }
 .filters-reset:hover { color: var(--danger); }
+.filters-reset[hidden] { display: none; }
 
 .filters {
     max-width: 1280px;
@@ -357,6 +359,7 @@ input, textarea, select {
     gap: 12px;
     animation: filtersIn .25s var(--ease-soft);
 }
+.filters[hidden] { display: none; }
 @keyframes filtersIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
 .filter-row {
@@ -373,6 +376,7 @@ input, textarea, select {
     padding-top: 10px;
     border-top: 1px solid var(--brd);
 }
+.filter-tags-wrap[hidden] { display: none; }
 .filter-tags {
     display: flex;
     flex-wrap: wrap;
@@ -4037,16 +4041,23 @@ function normRu(s) {
     return (s || "").toLowerCase().replace(/ё/g, "е").replace(/[^a-zа-я0-9 ]/g, "").replace(/\s+/g, " ").trim();
 }
 
-// «Короткая» запись = правило в одну фразу: показываем пунктом списка без заголовка.
-// Критерии: нет фото, content короткий (≤ ~140 симв) и по сути одно предложение.
+// Подзаголовок дублирует название главы? (убираем римские/арабские префиксы вроде «III.»)
+function subDuplicatesChapter(sub, chapter) {
+    const strip = (s) => normRu((s || "").replace(/^[ivxлмсшт0-9]+[.)]\s*/i, ""));
+    const ns = strip(sub), nc = strip(chapter);
+    if (!ns) return true;
+    return ns === nc || ns.includes(nc) || nc.includes(ns);
+}
+
+// «Короткая» запись = правило-чеклист: показываем пунктом списка без заголовка.
+// Критерии: нет фото, content ≤ ~230 симв и не больше короткого абзаца (≤3 предложений).
 function isShortRule(r) {
     if (r.hasPhoto) return false;                 // фото → развёрнутый вид
     const c = (r.content || "").trim();
     if (!c) return false;
-    if (c.length > 180) return false;             // длинный текст → абзац
-    // одно предложение: не больше одной точки в середине
+    if (c.length > 230) return false;             // длинный текст → абзац
     const innerDots = (c.slice(0, -1).match(/[.!?]/g) || []).length;
-    if (innerDots > 1) return false;
+    if (innerDots > 2) return false;              // больше 3 предложений → абзац
     return true;
 }
 
@@ -4126,7 +4137,7 @@ function renderBook() {
         }
         
         subKeys.forEach(sub => {
-            if (sub) {
+            if (sub && !subDuplicatesChapter(sub, chapterTitle(cat))) {
                 html += `<h3 class="book-section-title">${escapeHtml(sub)}</h3>`;
             }
 
