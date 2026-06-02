@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -8,12 +7,10 @@
 <title>МБ База Знаний</title>
 
 <!-- PWA манифест встроенный -->
-
 <link rel="manifest" href='data:application/json;charset=utf-8,{"name":"МБ База Знаний","short_name":"МБ База","start_url":".","display":"standalone","background_color":"%23FAF9F5","theme_color":"%23FAF9F5","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2724%27 fill=%27%23FAF9F5%27/%3E%3Ctext y=%27.95em%27 x=%2738%27 font-size=%27130%27 font-family=%27serif%27 fill=%27%23463F30%27%3E%26%23128218%3B%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='.9em' font-size='52'%3E📚%3C/text%3E%3C/svg%3E">
 
 <!-- Шрифты: Playfair Display для заголовков (книжный), DM Sans для тела -->
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
@@ -2240,7 +2237,6 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 }
 .ai-needkey a { color: var(--acc); cursor: pointer; text-decoration: underline; }
 </style>
-
 </head>
 <body>
 
@@ -2296,17 +2292,14 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 <div class="stats" id="stats"></div>
 
 <!-- Лента кружков-сторис (над фидом, как в Instagram) -->
-
 <div class="stories-bar" id="stories-bar" hidden></div>
 
 <main class="feed" id="feed"></main>
 
 <!-- Режим: Книга -->
-
 <section class="book" id="book" hidden></section>
 
 <!-- Полноэкранный проигрыватель сторис -->
-
 <div class="player" id="player">
     <div class="player-frame" id="player-frame">
         <div class="player-progress" id="player-progress"></div>
@@ -2321,25 +2314,21 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- FAB: добавить запись -->
-
 <button class="fab" id="btn-add" title="Добавить запись" aria-label="Добавить запись">
     <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
 </button>
 
 <!-- Кнопка "наверх" (видна только в режиме Книга) -->
-
 <button class="book-top" id="btn-top" title="Наверх" aria-label="Наверх">
     <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
 <!-- Модалка просмотра записи -->
-
 <div class="modal-backdrop" id="modal-view">
     <div class="modal" id="modal-view-content"></div>
 </div>
 
 <!-- Модалка добавления -->
-
 <div class="modal-backdrop" id="modal-add">
     <div class="modal form-modal">
         <button class="modal-close" onclick="closeModal('modal-add')" aria-label="Закрыть">
@@ -2413,7 +2402,6 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Модалка: возможные конфликты при сохранении -->
-
 <div class="modal-backdrop" id="modal-conflict">
     <div class="modal form-modal">
         <button class="modal-close" onclick="closeModal('modal-conflict')" aria-label="Закрыть">
@@ -2430,7 +2418,6 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Модалка: поиск конфликтов в базе -->
-
 <div class="modal-backdrop" id="modal-conflicts">
     <div class="modal form-modal">
         <button class="modal-close" onclick="closeModal('modal-conflicts')" aria-label="Закрыть">
@@ -2443,7 +2430,6 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Меню -->
-
 <div class="modal-backdrop" id="modal-menu">
     <div class="modal form-modal">
         <button class="modal-close" id="m-close" aria-label="Закрыть">
@@ -2489,7 +2475,6 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 <input type="file" id="file-photo" accept="image/*" style="display:none;">
 
 <!-- Лайтбокс — полноэкранный просмотр фото узла -->
-
 <div class="lightbox" id="lightbox">
     <button class="lightbox-close" id="lightbox-close" aria-label="Закрыть">
         <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -2499,7 +2484,6 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Модалка: ИИ-поиск «Спросить базу» -->
-
 <div class="modal-backdrop ai-panel" id="modal-ai">
     <div class="modal form-modal">
         <button class="modal-close" id="ai-close" aria-label="Закрыть">
@@ -2516,7 +2500,6 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
 </div>
 
 <!-- Модалка: настройки ИИ (ключ) -->
-
 <div class="modal-backdrop" id="modal-ai-settings">
     <div class="modal form-modal">
         <button class="modal-close" id="ai-set-close" aria-label="Закрыть">
@@ -4130,14 +4113,17 @@ function subDuplicatesChapter(sub, chapter) {
 }
 
 // «Короткая» запись = правило-чеклист: показываем пунктом списка без заголовка.
-// Критерии: нет фото, content ≤ ~230 симв и не больше короткого абзаца (≤3 предложений).
+// Критерии: нет фото, content ≤ ~380 симв. Точки внутри ссылок/размеров не считаем
+// за предложения, поэтому лимит предложений мягкий — режет только реально длинные.
 function isShortRule(r) {
     if (r.hasPhoto) return false;                 // фото → развёрнутый вид
     const c = (r.content || "").trim();
     if (!c) return false;
-    if (c.length > 230) return false;             // длинный текст → абзац
-    const innerDots = (c.slice(0, -1).match(/[.!?]/g) || []).length;
-    if (innerDots > 2) return false;              // больше 3 предложений → абзац
+    if (c.length > 380) return false;             // длинный текст → абзац
+    // Считаем предложения по «. » / «! » / «? » (пробел после), чтобы не ловить
+    // точки в URL (..ru/...) и размерах (1.5мм)
+    const sentences = (c.match(/[.!?]\s/g) || []).length;
+    if (sentences > 4) return false;              // совсем многословное → абзац
     return true;
 }
 
@@ -5072,6 +5058,5 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register(swUrl).catch(() => {});
 }
 </script>
-
 </body>
 </html>
