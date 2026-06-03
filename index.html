@@ -2236,7 +2236,56 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
     font-family: var(--sans); font-size: 14px; line-height: 1.5; color: var(--t1);
 }
 .ai-needkey a { color: var(--acc); cursor: pointer; text-decoration: underline; }
+
+/* Счётчик расхода ИИ */
+.ai-usage-box {
+    margin-top: 4px;
+    padding: 14px 16px;
+    background: var(--surf-2);
+    border-radius: var(--r-input);
+}
+.ai-usage-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--sans); font-size: 13px; color: var(--t2);
+    padding: 4px 0;
+}
+.ai-usage-row strong { color: var(--t1); font-weight: 600; }
+.ai-usage-reset {
+    margin-top: 10px;
+    font-family: var(--sans); font-size: 12px;
+    padding: 6px 12px; border: 1px solid var(--brd);
+    background: transparent; color: var(--t2);
+    border-radius: var(--r-pill); cursor: pointer;
+}
+.ai-usage-reset:hover { color: var(--danger); border-color: var(--danger); }
+
+/* Список ненайденного */
+.missed-item {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--brd);
+    cursor: pointer;
+    transition: background .12s var(--ease-soft);
+    display: flex; flex-direction: column; gap: 3px;
+}
+.missed-item:hover { background: var(--surf-2); }
+.missed-item:last-child { border-bottom: none; }
+.missed-q {
+    font-family: var(--sans); font-size: 15px;
+    color: var(--t1); line-height: 1.4;
+}
+.missed-meta {
+    font-family: var(--sans); font-size: 11px; color: var(--t3);
+    display: flex; align-items: center; gap: 8px;
+}
+.missed-count {
+    background: var(--acc-bg); color: var(--acc);
+    font-weight: 600; padding: 1px 7px; border-radius: var(--r-pill);
+}
 </style>
+<!-- Firebase (compat) — только для журнала ненайденных запросов -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -2441,6 +2490,10 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
                 <span>Поиск конфликтов в базе</span>
             </button>
+            <button class="menu-item" id="m-missed">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M11 8v3M11 14h.01"/></svg>
+                <span>Что искали, но не нашли</span>
+            </button>
             <button class="menu-item" id="m-ai-settings">
                 <svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.2L19 10l-5.1 1.8L12 17l-1.9-5.2L5 10l5.1-1.8z"/></svg>
                 <span>Настройки ИИ (API ключ)</span>
@@ -2511,10 +2564,23 @@ html.dark .lightbox { background: rgba(0,0,0,.88); }
             <input type="password" id="ai-key-input" placeholder="sk-ant-..." autocomplete="off">
             <div class="set-hint" style="font-family:var(--sans);font-size:12px;color:var(--t2);margin-top:6px;line-height:1.4;">Хранится только в этом браузере (localStorage), в файл не попадает. Ключ берётся на console.anthropic.com → API Keys.</div>
         </div>
+        <div class="ai-usage" id="ai-usage"></div>
         <div class="form-actions">
             <button class="btn" id="ai-key-clear">Удалить ключ</button>
             <button class="btn btn-primary" id="ai-key-save">Сохранить</button>
         </div>
+    </div>
+</div>
+
+<!-- Модалка: что искали, но не нашли -->
+<div class="modal-backdrop" id="modal-missed">
+    <div class="modal form-modal">
+        <button class="modal-close" id="missed-close" aria-label="Закрыть">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <h2>Что искали, но не нашли</h2>
+        <p class="ai-hint">Запросы конструкторов, на которые база не дала ответа. Подсказывают, чего не хватает — и что добавить.</p>
+        <div id="missed-list"></div>
     </div>
 </div>
 
@@ -2720,6 +2786,7 @@ async function loadCorpus() {
 async function init() {
     loadTheme();
     await PhotoDB.init();
+    initFirebase();
     let records = loadFromStorage();
     
     if (!records || records.length === 0) {
@@ -3018,6 +3085,16 @@ function renderFeed() {
                 <div>Попробуйте изменить запрос или сбросить фильтры</div>
             </div>
         `;
+        // Сбор ненайденного: только если был текстовый запрос (не просто фильтры)
+        if (query && query.trim().length >= 3) {
+            clearTimeout(window._missedTimer);
+            window._missedTimer = setTimeout(() => {
+                // повторно проверяем, что запрос всё ещё пустой (юзер мог дописать)
+                if (state.filter.text === query && filterRecords().length === 0) {
+                    maybeLogMissed(query);
+                }
+            }, 1800);
+        }
         return;
     }
     
@@ -4380,6 +4457,99 @@ function loadMode() {
 }
 
 // ========================================================
+// FIREBASE — журнал ненайденных запросов (append-only)
+// Лёгкий сбор: каждый ненайденный поиск дописывается отдельным
+// документом. Никакой синхронизации корпуса — только дозапись.
+// Путь: apps/techcheck/missed_queries/{autoId}
+// ========================================================
+const FB_CONFIG = {
+    apiKey: "AIzaSyAgIA0PLvUOJsRN8tHRzC03evTTkt3KHHc",
+    authDomain: "skills-tracker-3f21b.firebaseapp.com",
+    projectId: "skills-tracker-3f21b",
+    storageBucket: "skills-tracker-3f21b.firebasestorage.app",
+    messagingSenderId: "108202530564",
+    appId: "1:108202530564:web:31ecf70071f49a89abe251"
+};
+let fbDb = null, fbEnabled = false;
+
+function initFirebase() {
+    try {
+        if (typeof firebase === "undefined") return;
+        firebase.initializeApp(FB_CONFIG);
+        fbDb = firebase.firestore();
+        firebase.auth().signInAnonymously()
+            .then(() => { fbEnabled = true; })
+            .catch(() => { fbEnabled = false; });
+    } catch (e) { fbEnabled = false; }
+}
+
+// Краткий стабильный id устройства (чтобы различать, кто прислал)
+function getDeviceTag() {
+    let tag = localStorage.getItem("mb_device_tag");
+    if (!tag) {
+        tag = "d_" + Math.random().toString(36).slice(2, 7);
+        localStorage.setItem("mb_device_tag", tag);
+    }
+    return tag;
+}
+
+// Записать ненайденный запрос в общий журнал
+function logMissedQuery(query) {
+    const q = (query || "").trim();
+    if (!q || q.length < 3) return;
+    // Локальная копия — на случай офлайна и для быстрого просмотра
+    try {
+        const local = JSON.parse(localStorage.getItem("mb_missed_local") || "[]");
+        local.push({ query: q, date: new Date().toISOString(), device: getDeviceTag() });
+        localStorage.setItem("mb_missed_local", JSON.stringify(local.slice(-200)));
+    } catch (e) {}
+    // В облако (если доступно)
+    if (fbEnabled && fbDb) {
+        fbDb.collection("apps").doc("techcheck").collection("missed_queries").add({
+            query: q,
+            date: firebase.firestore.FieldValue.serverTimestamp(),
+            device: getDeviceTag()
+        }).catch(() => {});
+    }
+}
+
+// Не засорять журнал: один и тот же запрос за сессию — один раз
+const _missedThisSession = new Set();
+function maybeLogMissed(query) {
+    const q = (query || "").trim().toLowerCase();
+    if (!q || q.length < 3) return;
+    if (_missedThisSession.has(q)) return;
+    _missedThisSession.add(q);
+    logMissedQuery(query);
+}
+
+// Загрузить журнал для просмотра автором (облако + локальное)
+async function loadMissedQueries() {
+    const result = [];
+    if (fbEnabled && fbDb) {
+        try {
+            const snap = await fbDb.collection("apps").doc("techcheck")
+                .collection("missed_queries").orderBy("date", "desc").limit(300).get();
+            snap.forEach(doc => {
+                const d = doc.data();
+                result.push({
+                    query: d.query,
+                    date: d.date && d.date.toDate ? d.date.toDate() : null,
+                    device: d.device || "",
+                    id: doc.id
+                });
+            });
+            return result;
+        } catch (e) {}
+    }
+    // fallback — локальное
+    try {
+        const local = JSON.parse(localStorage.getItem("mb_missed_local") || "[]");
+        return local.reverse().map(x => ({ query: x.query, date: new Date(x.date), device: x.device }));
+    } catch (e) { return []; }
+}
+
+// ========================================================
 // ИИ-ПОИСК «Спросить базу» (RAG на Claude API)
 // Механика вызова — как в «Рефлексии»: прямой запрос из браузера,
 // ключ в localStorage, в файл не попадает.
@@ -4434,10 +4604,50 @@ async function callClaudeSystem(sys, userMsg, maxTokens = 700) {
     });
     const raw = await r.text();
     if (!r.ok) { let m = "HTTP " + r.status; try { m = JSON.parse(raw)?.error?.message || m; } catch (_) {} throw new Error(m); }
-    return JSON.parse(raw).content[0].text;
+    const data = JSON.parse(raw);
+    // Учёт расхода токенов
+    if (data.usage) trackUsage(data.usage.input_tokens || 0, data.usage.output_tokens || 0);
+    return data.content[0].text;
 }
 
-let aiLastSources = [];
+// === СЧЁТЧИК ТОКЕНОВ И СТОИМОСТИ ===
+// Цены Claude Sonnet 4: вход $3 / млн, выход $15 / млн токенов
+const AI_PRICE_IN = 3 / 1e6, AI_PRICE_OUT = 15 / 1e6;
+function trackUsage(inTok, outTok) {
+    try {
+        const u = JSON.parse(localStorage.getItem("mb_ai_usage") || '{"in":0,"out":0,"calls":0}');
+        u.in += inTok; u.out += outTok; u.calls += 1;
+        localStorage.setItem("mb_ai_usage", JSON.stringify(u));
+    } catch (e) {}
+}
+function getUsage() {
+    try { return JSON.parse(localStorage.getItem("mb_ai_usage") || '{"in":0,"out":0,"calls":0}'); }
+    catch (e) { return { in: 0, out: 0, calls: 0 }; }
+}
+function usageCostUsd() {
+    const u = getUsage();
+    return u.in * AI_PRICE_IN + u.out * AI_PRICE_OUT;
+}
+function renderUsage() {
+    const el = document.getElementById("ai-usage");
+    if (!el) return;
+    const u = getUsage();
+    if (u.calls === 0) { el.innerHTML = ""; return; }
+    const cost = usageCostUsd();
+    el.innerHTML = `
+        <div class="ai-usage-box">
+            <div class="ai-usage-row"><span>Запросов к ИИ</span><strong>${u.calls}</strong></div>
+            <div class="ai-usage-row"><span>Токенов (вход / выход)</span><strong>${u.in.toLocaleString("ru")} / ${u.out.toLocaleString("ru")}</strong></div>
+            <div class="ai-usage-row"><span>Потрачено примерно</span><strong>$${cost.toFixed(3)}</strong></div>
+            <button class="ai-usage-reset" id="ai-usage-reset">Сбросить счётчик</button>
+        </div>`;
+    const btn = document.getElementById("ai-usage-reset");
+    if (btn) btn.onclick = () => {
+        localStorage.setItem("mb_ai_usage", '{"in":0,"out":0,"calls":0}');
+        renderUsage();
+        toast("Счётчик сброшен");
+    };
+}
 
 async function askKnowledgeBase(question) {
     const result = document.getElementById("ai-result");
@@ -4564,9 +4774,52 @@ function openAiPanel(prefill) {
 
 function openAiSettings() {
     document.getElementById("ai-key-input").value = getAiKey();
+    renderUsage();
     document.getElementById("modal-ai-settings").classList.add("visible");
 }
 
+async function openMissedModal() {
+    const list = document.getElementById("missed-list");
+    list.innerHTML = `<div class="ai-thinking"><span class="dot"></span><span>Загружаю запросы…</span></div>`;
+    document.getElementById("modal-missed").classList.add("visible");
+    const items = await loadMissedQueries();
+    if (!items.length) {
+        list.innerHTML = `<div class="empty" style="padding:30px 10px;"><div class="empty-title">Пока пусто</div><div>Здесь появятся запросы, на которые база не нашла ответа</div></div>`;
+        return;
+    }
+    // Группируем одинаковые запросы, считаем повторы
+    const map = new Map();
+    items.forEach(it => {
+        const k = it.query.trim().toLowerCase();
+        if (!map.has(k)) map.set(k, { query: it.query, count: 0, last: it.date });
+        const e = map.get(k);
+        e.count++;
+        if (it.date && (!e.last || it.date > e.last)) e.last = it.date;
+    });
+    const grouped = [...map.values()].sort((a, b) => b.count - a.count || (b.last || 0) - (a.last || 0));
+    list.innerHTML = grouped.map(g => `
+        <div class="missed-item" data-q="${escapeHtml(g.query)}">
+            <div class="missed-q">${escapeHtml(g.query)}</div>
+            <div class="missed-meta">${g.count > 1 ? `<span class="missed-count">${g.count}×</span>` : ""}${g.last ? formatMissedDate(g.last) : ""}</div>
+        </div>`).join("");
+    // Клик по запросу — подставить в поиск
+    list.querySelectorAll(".missed-item").forEach(el => {
+        el.onclick = () => {
+            closeModal("modal-missed");
+            const s = document.getElementById("search");
+            s.value = el.dataset.q;
+            state.filter.text = el.dataset.q;
+            renderFeed();
+            s.scrollIntoView({ behavior: "smooth" });
+        };
+    });
+}
+
+function formatMissedDate(d) {
+    try {
+        return new Intl.DateTimeFormat("ru", { day: "numeric", month: "short" }).format(d);
+    } catch (e) { return ""; }
+}
 
 // Список сторис лежит в файле stories/index.json рядом с index.html.
 // Чтобы добавить сторис: положи stories/<имя>.json и впиши строку в
@@ -4975,6 +5228,8 @@ function bindEvents() {
     });
     // Настройки ИИ
     document.getElementById("m-ai-settings").onclick = () => { closeModal("modal-menu"); openAiSettings(); };
+    document.getElementById("m-missed").onclick = () => { closeModal("modal-menu"); openMissedModal(); };
+    document.getElementById("missed-close").onclick = () => closeModal("modal-missed");
     document.getElementById("ai-set-close").onclick = () => closeModal("modal-ai-settings");
     document.getElementById("ai-key-save").onclick = () => {
         setAiKey(document.getElementById("ai-key-input").value.trim());
