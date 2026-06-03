@@ -1,16 +1,16 @@
 [
   {
+    "id": "howto",
+    "file": "stories/howto.json",
+    "title": "Как пользоваться",
+    "sub": "разбор за минуту",
+    "icon": "?"
+  },
+  {
     "id": "about",
     "file": "stories/about.json",
     "title": "О программе",
     "sub": "что умеет ТехЧекПро",
-    "icon": "?"
-  },
-  {
-    "id": "zerkalo",
-    "file": "stories/zerkalo.json",
-    "title": "Работа с зеркалом",
-    "sub": "4 шага: от чертежа до крепления",
-    "icon": "З"
+    "icon": "i"
   }
 ]
